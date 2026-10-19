@@ -1,0 +1,51 @@
+/* Scene 05: 8 Functions.
+   State 0: Full-bleed cover.
+   State 1 (1-4): Photo docks left (440px), 2x2 grid sits right (left: 440px).
+   State 2 (5-8): Photo glides across to right (left: 1160px), 2x2 grid sits left (right: 440px). */
+#scene-5 .state-layer { position: absolute; inset: 0; }
+#scene-5 .s05-cover, #scene-5 .s05-matrix { position: relative; width: 100%; height: 100%; overflow: hidden; }
+#scene-5 .s05-bg { display: none; }
+#scene-5 .s05-shade {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(180deg, rgba(7,9,14,0.35) 0%, rgba(7,9,14,0.15) 45%, rgba(7,9,14,0.88) 100%);
+}
+#scene-5 .s05-matrix .s05-shade { display: none; }
+#scene-5 .s05-cover-copy {
+  position: relative; z-index: 2; height: 100%;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 0 84px 76px; max-width: 1180px;
+}
+#scene-5 .s05-cover-copy .kicker { margin-bottom: 14px; }
+#scene-5 .s05-cover-copy .headline { font-size: 68px; line-height: 1.06; margin: 0; }
+
+/* State 1: photo is docked left (0..440px), matrix occupies 440..1600px */
+#scene-5 .state-layer[data-state="1"] .s05-matrix {
+  padding: 52px 64px 48px 500px;
+  display: flex; flex-direction: column; justify-content: center; gap: 24px;
+}
+/* State 2: photo glides to right (1160..1600px), matrix occupies 0..1160px */
+#scene-5 .state-layer[data-state="2"] .s05-matrix {
+  padding: 52px 500px 48px 64px;
+  display: flex; flex-direction: column; justify-content: center; gap: 24px;
+}
+#scene-5 .s05-head { position: relative; z-index: 2; }
+#scene-5 .s05-head .kicker { margin-bottom: 8px; }
+#scene-5 .s05-head .headline { font-size: 38px; line-height: 1.1; margin: 0 0 8px; }
+#scene-5 .s05-count {
+  font-family: var(--mono); font-size: 14px; letter-spacing: 0.08em; color: var(--gold);
+}
+#scene-5 .s05-grid {
+  position: relative; z-index: 2;
+  display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+  gap: 16px; flex: none; height: 480px; min-height: 0;
+}
+#scene-5 .s05-cell {
+  padding: 24px 24px;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 10px;
+  border: 1px solid rgba(244,240,232,0.14);
+  background: rgba(17,24,38,0.95);
+  min-height: 0; overflow: hidden;
+}
+#scene-5 .s05-cell .num { font-family: var(--mono); font-size: 14px; letter-spacing: 0.08em; color: var(--gold); }
+#scene-5 .s05-cell h3 { font-family: var(--serif); font-weight: 400; font-size: 24px; line-height: 1.15; margin: 6px 0 0; }
+#scene-5 .s05-cell p { font-size: 15.5px; line-height: 1.4; color: var(--muted); }

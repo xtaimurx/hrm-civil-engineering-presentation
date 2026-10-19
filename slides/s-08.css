@@ -1,0 +1,55 @@
+/* Scene 08: performance cover plus outcomes ledger. Scoped to #scene-8. */
+#scene-8 .state-layer { position: absolute; inset: 0; }
+#scene-8 .s08-cover { position: absolute; inset: 0; overflow: hidden; background: #05070b; }
+#scene-8 .s08-bg { position: absolute; inset: 0; }
+#scene-8 .s08-bg img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 60%; display: block; }
+#scene-8 .s08-shade {
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(180deg, rgba(7,9,14,0.55) 0%, rgba(7,9,14,0.35) 45%, rgba(7,9,14,0.78) 100%);
+}
+#scene-8 .s08-cover-copy {
+  position: absolute; z-index: 2; left: 84px; right: 84px; bottom: 84px;
+  max-width: 1100px;
+}
+#scene-8 .s08-cover-copy .headline { font-size: 72px; margin-bottom: 0; }
+#scene-8 .s08-split {
+  position: absolute; inset: 0;
+  display: grid; grid-template-columns: 430px 1fr;
+  background: #0e131d;
+}
+#scene-8 .s08-strip { position: relative; height: 100%; overflow: hidden; background: #05070b; }
+#scene-8 .s08-strip img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  object-position: 38% 55%;
+  filter: contrast(1.05) brightness(0.96);
+}
+#scene-8 .s08-strip::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(7,9,14,0) 70%, rgba(14,19,29,0.55) 100%);
+}
+#scene-8 .s08-copy {
+  padding: 52px 60px 44px;
+  display: flex; flex-direction: column; justify-content: center;
+  min-height: 0;
+}
+#scene-8 .s08-copy .headline { font-size: 44px; margin-bottom: 22px; }
+#scene-8 .s08-list {
+  display: flex; flex-direction: column;
+  border-top: 1px solid rgba(244, 240, 232, 0.16);
+}
+#scene-8 .s08-row {
+  display: grid; grid-template-columns: 48px 1fr; gap: 16px;
+  padding: 12px 14px;
+  background: transparent;
+  border-bottom: 1px solid rgba(244, 240, 232, 0.16);
+}
+#scene-8 .s08-num { font-family: var(--mono); font-size: 14px; color: var(--muted); padding-top: 4px; }
+#scene-8 .s08-meta { display: flex; align-items: baseline; gap: 10px; margin-bottom: 2px; }
+#scene-8 .s08-meta .metric {
+  font-family: var(--mono); font-size: 13px; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--ivory);
+}
+#scene-8 .s08-dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(244,240,232,0.4); align-self: center; flex: none; }
+#scene-8 .s08-meta h3 { font-family: var(--serif); font-weight: 400; font-size: 21px; line-height: 1.2; }
+#scene-8 .s08-body p { font-size: 15px; line-height: 1.4; color: var(--muted); }
+#scene-8 .pillars-bg { display: none; }

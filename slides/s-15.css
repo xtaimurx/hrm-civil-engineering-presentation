@@ -1,0 +1,55 @@
+/* Scene 15 finale: poster invite over tower_full.jpg plus small side note. */
+#scene-15 .state-layer { width: 100%; height: 100%; }
+#scene-15 .fin15 { position: relative; width: 100%; height: 100%; overflow: hidden; background: #07090e; }
+#scene-15 .fin15-photo { position: absolute; inset: 0; }
+#scene-15 .fin15-photo img {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: 50% 0%;
+  display: block; filter: contrast(1.05) brightness(0.9);
+}
+#scene-15 .fin15-shade {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, rgba(7,9,14,0.55) 0%, rgba(7,9,14,0.18) 30%, rgba(7,9,14,0.34) 62%, rgba(7,9,14,0.78) 100%),
+    radial-gradient(900px 480px at 50% 52%, rgba(7,9,14,0.55) 0%, rgba(7,9,14,0) 70%);
+}
+#scene-15 .fin15-center {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 68px;
+}
+#scene-15 .fin15-center .kicker {
+  font-size: 18px; letter-spacing: 0.16em; 
+  margin-bottom: 20px;
+}
+#scene-15 .fin15-headline {
+  font-size: 104px; line-height: 1.0; letter-spacing: -0.02em;
+  margin: 0; max-width: 14ch;
+  text-shadow: 0 4px 40px rgba(0,0,0,0.75);
+}
+#scene-15 .is-note .fin15-center { justify-content: flex-start; padding-top: 150px; }
+#scene-15 .is-note .fin15-headline { font-size: 76px; }
+#scene-15 .fin15-note {
+  position: absolute; right: 68px; bottom: 64px;
+  width: 430px; max-width: 33.333%;
+  background: rgba(10,14,22,0.86);
+  border: 1px solid rgba(244,240,232,0.18);
+  padding: 24px 26px 22px;
+  text-align: left;
+}
+#scene-15 .fin15-note h3 {
+  font-family: var(--mono); font-size: 14px; font-weight: 400;
+  letter-spacing: 0.1em; color: var(--ivory);
+  margin-bottom: 12px;
+}
+#scene-15 .fin15-note ul { list-style: none; }
+#scene-15 .fin15-note li {
+  font-size: 16px; line-height: 1.45; color: var(--muted);
+  padding: 7px 0 7px 16px; position: relative;
+}
+#scene-15 .fin15-note li::before {
+  content: ""; position: absolute; left: 0; top: 15px;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(244,240,232,0.55);
+}

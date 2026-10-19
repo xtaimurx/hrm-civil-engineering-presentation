@@ -1,0 +1,46 @@
+/* Scene 11: safety culture.
+   State 0: Full-bleed cover (safety_sparks.jpg).
+   State 1: Photo docks into right-hand frame (940..1536px) while headline, dek,
+            and 3 duty-holder cards stack cleanly on the left (64..896px). */
+#scene-11 .state-layer { position: absolute; inset: 0; }
+#scene-11 .s11-cover, #scene-11 .s11-duties {
+  position: absolute; inset: 0; overflow: hidden; background: transparent !important;
+}
+#scene-11 .s11-bg { display: none; }
+#scene-11 .s11-shade {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(7,9,14,0.42) 0%, rgba(7,9,14,0.10) 38%, rgba(7,9,14,0.72) 100%),
+    linear-gradient(90deg, rgba(7,9,14,0.78) 0%, rgba(7,9,14,0.45) 34%, rgba(7,9,14,0.06) 62%);
+}
+#scene-11 .s11-shade-duties { display: none; }
+#scene-11 .s11-cover-copy {
+  position: absolute; z-index: 2; left: 84px; right: 84px; bottom: 84px;
+  max-width: 1050px;
+}
+#scene-11 .s11-cover-copy .headline { font-size: 76px; line-height: 1.02; margin-bottom: 0; }
+#scene-11 .s11-top {
+  position: absolute; z-index: 2; left: 68px; top: 56px; width: 820px;
+}
+#scene-11 .s11-top .headline { font-size: 44px; line-height: 1.08; margin-bottom: 12px; }
+#scene-11 .s11-top .dek { font-size: 17.5px; line-height: 1.48; max-width: 58ch; }
+#scene-11 .s11-grid {
+  position: absolute; z-index: 2; left: 68px; bottom: 56px; width: 820px;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: stretch;
+  padding-top: 20px;
+  border-top: 1px solid rgba(244, 240, 232, 0.22);
+}
+#scene-11 .s11-duty {
+  background: rgba(17, 24, 38, 0.95);
+  border: 1px solid rgba(244, 240, 232, 0.16);
+  padding: 20px 20px;
+}
+#scene-11 .s11-num {
+  font-family: var(--mono); font-size: 13px; color: var(--gold); margin-bottom: 8px;
+}
+#scene-11 .s11-duty h3 {
+  font-family: var(--serif); font-size: 22px; font-weight: 400; color: var(--ivory); margin-bottom: 8px;
+}
+#scene-11 .s11-duty p {
+  font-size: 15px; line-height: 1.42; color: var(--muted);
+}

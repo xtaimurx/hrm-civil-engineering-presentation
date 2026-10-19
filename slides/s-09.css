@@ -1,0 +1,36 @@
+/* Scene 09: productivity. Two stacked states crossfaded in place by the engine. */
+#scene-9 .state-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* State 0: cover, full bleed photo with kicker and big title only. */
+#scene-9 .s09-cover { position: relative; width: 100%; height: 100%; }
+#scene-9 .s09-cover-photo { position: absolute; inset: 0; overflow: hidden; background: #05070b; }
+#scene-9 .s09-cover-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 55%; display: block; }
+#scene-9 .s09-cover-shade {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(7, 9, 14, 0.42) 0%, rgba(7, 9, 14, 0.30) 42%, rgba(7, 9, 14, 0.88) 100%);
+}
+#scene-9 .s09-cover-copy {
+  position: absolute; left: 84px; right: 84px; bottom: 84px; z-index: 2;
+}
+#scene-9 .s09-cover-copy .kicker { font-size: 18px; }
+#scene-9 .s09-cover-copy .headline { font-size: 78px; line-height: 1.04; margin-bottom: 0; max-width: 20ch; }
+
+/* State 1: split with photo left, units and insight right. */
+#scene-9 .s09-wrap { width: 100%; height: 100%; display: grid; grid-template-columns: 38% 62%; }
+#scene-9 .s09-photo { position: relative; height: 100%; overflow: hidden; background: #05070b; margin: 0; }
+#scene-9 .s09-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 56% 52%; display: block; }
+#scene-9 .s09-copy { padding: 48px 60px; display: flex; flex-direction: column; justify-content: center; min-height: 0; }
+#scene-9 .s09-copy .headline { font-size: 44px; line-height: 1.08; margin-bottom: 12px; }
+#scene-9 .s09-copy .dek { font-size: 18px; margin-bottom: 24px; }
+#scene-9 .s09-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+#scene-9 .s09-card {
+  background: #141c2b; border: 1px solid rgba(244, 240, 232, 0.14);
+  padding: 16px 18px; min-width: 0;
+}
+#scene-9 .s09-unit { font-family: var(--mono); font-size: 13px; color: var(--gold); margin-bottom: 5px; }
+#scene-9 .s09-unit sup { font-size: 0.72em; }
+#scene-9 .s09-card h4 { font-family: var(--serif); font-size: 20px; font-weight: 400; margin-bottom: 6px; }
+#scene-9 .s09-card p { font-size: 14.5px; line-height: 1.42; color: var(--muted); }
+#scene-9 .s09-insight { grid-column: 1 / -1; background: #1a2334; padding: 20px 22px; }
+#scene-9 .s09-insight h4 { font-size: 24px; }
+#scene-9 .s09-insight p { font-size: 16px; }

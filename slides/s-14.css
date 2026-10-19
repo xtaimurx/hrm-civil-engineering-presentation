@@ -1,0 +1,55 @@
+/* Scene 14: Conclusion & references (nara_steel_crew.jpg).
+   State 0: Full-bleed cover with headline in top rock zone above all 6 drillers.
+   State 1: Photo docks into right-hand portrait column (920..1600px) at full
+            clarity while conclusion headline, dek, and 3 reference cards stack
+            cleanly on the left (68..860px). */
+#scene-14 .state-layer { width: 100%; height: 100%; }
+#scene-14 .s14-wrap {
+  position: relative; width: 100%; height: 100%; overflow: hidden; background: transparent !important;
+}
+#scene-14 .s14-bg { display: none; }
+#scene-14 .s14-scrim { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+#scene-14 .scrim-cover {
+  background: linear-gradient(180deg,
+    rgba(7, 9, 14, 0.84) 0%,
+    rgba(7, 9, 14, 0.52) 28%,
+    rgba(7, 9, 14, 0.04) 48%,
+    rgba(7, 9, 14, 0) 65%);
+}
+#scene-14 .scrim-close { display: none; }
+#scene-14 .s14-top {
+  position: absolute; z-index: 2; left: 84px; right: 84px; top: 60px; max-width: 1180px;
+}
+#scene-14 .state-layer[data-state="1"] .s14-top {
+  left: 68px; right: auto; width: 790px; top: 56px;
+}
+#scene-14 .s14-headline {
+  font-size: 68px; line-height: 1.04; margin-bottom: 16px;
+}
+#scene-14 .state-layer[data-state="1"] .s14-headline {
+  font-size: 46px; line-height: 1.08; margin-bottom: 14px;
+}
+#scene-14 .s14-dek {
+  font-size: 18px; line-height: 1.48; color: var(--muted); max-width: 58ch;
+}
+#scene-14 .s14-refs {
+  position: absolute; z-index: 2; left: 68px; width: 790px; bottom: 52px;
+}
+#scene-14 .s14-refs-label {
+  font-family: var(--mono); font-size: 13px; letter-spacing: 0.08em;
+  color: var(--gold); margin-bottom: 12px;
+}
+#scene-14 .s14-refs-grid {
+  display: grid; grid-template-columns: 1fr; gap: 12px;
+}
+#scene-14 .s14-ref-card {
+  background: rgba(17, 24, 38, 0.95);
+  border: 1px solid rgba(244, 240, 232, 0.14);
+  padding: 14px 18px;
+}
+#scene-14 .s14-ref-card h3 {
+  font-family: var(--serif); font-size: 18px; font-weight: 400; color: var(--ivory); margin-bottom: 4px;
+}
+#scene-14 .s14-ref-card p {
+  font-size: 14px; line-height: 1.38; color: var(--muted);
+}

@@ -1,0 +1,47 @@
+/* Scene 10: 7 Challenges.
+   State 0: Full-bleed cover (crews_portrait.jpg).
+   State 1 (1-4): Photo docks left (0..440px), 2x2 grid sits right.
+   State 2 (5-7 + takeaway): Photo glides to right (1160..1600px), 2x2 grid sits left. */
+#scene-10 .state-layer { position: absolute; inset: 0; }
+#scene-10 .s10-cover { position: absolute; inset: 0; overflow: hidden; }
+#scene-10 .s10-bg { display: none; }
+#scene-10 .s10-shade {
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(180deg, rgba(7,9,14,0.35) 0%, rgba(7,9,14,0.15) 45%, rgba(7,9,14,0.88) 100%);
+}
+#scene-10 .s10-cover-copy {
+  position: absolute; z-index: 2; left: 84px; right: 84px; bottom: 76px;
+  max-width: 1100px;
+}
+#scene-10 .s10-cover-copy .headline { font-size: 72px; margin-bottom: 0; }
+
+#scene-10 .state-layer[data-state="1"] .s10-matrix {
+  position: absolute; inset: 0; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: center;
+  gap: 24px; padding: 52px 64px 48px 500px; background: transparent;
+}
+#scene-10 .state-layer[data-state="2"] .s10-matrix {
+  position: absolute; inset: 0; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: center;
+  gap: 24px; padding: 52px 500px 48px 64px; background: transparent;
+}
+#scene-10 .s10-head { position: relative; z-index: 2; }
+#scene-10 .s10-head .kicker { margin-bottom: 8px; }
+#scene-10 .s10-head .headline { font-size: 38px; line-height: 1.1; margin-bottom: 6px; }
+#scene-10 .s10-count { font-family: var(--mono); font-size: 14px; letter-spacing: 0.08em; color: var(--gold); }
+#scene-10 .s10-grid {
+  position: relative; z-index: 2;
+  display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+  gap: 16px; height: 480px; min-height: 0;
+}
+#scene-10 .s10-cell {
+  background: rgba(17, 24, 38, 0.95);
+  border: 1px solid rgba(244, 240, 232, 0.14);
+  padding: 22px 24px;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 10px;
+  min-height: 0; overflow: hidden;
+}
+#scene-10 .s10-cell .num { font-family: var(--mono); font-size: 14px; letter-spacing: 0.08em; color: var(--gold); }
+#scene-10 .s10-cell h3 { font-family: var(--serif); font-weight: 400; font-size: 24px; line-height: 1.18; margin: 6px 0 0; }
+#scene-10 .s10-cell p { font-size: 15px; line-height: 1.42; color: var(--muted); }
+#scene-10 .s10-cell.s10-takeaway { background: rgba(24, 32, 48, 0.96); }

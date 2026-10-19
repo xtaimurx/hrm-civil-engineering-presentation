@@ -1,0 +1,134 @@
+/* Scene hook overrides. Owned by the scene-hook agent. Base styles live in index.html; rules here win. */
+
+/* Backdrop stays hidden behind the full bleed photo in state 1, and reads as
+   a designed panel behind the reveal card in state 2. */
+#scene-1 .morph-stage {
+  background:
+    radial-gradient(900px 600px at 78% 20%, rgba(224, 169, 62, 0.08), transparent 65%),
+    radial-gradient(1000px 700px at 50% 55%, rgba(22, 34, 56, 0.5), transparent 75%),
+    #0a0d14;
+}
+
+/* One compromise crop that serves both geometries. Full bleed (1600x900)
+   crops top and bottom only, so the 30% vertical anchor keeps the worker and
+   skyline in frame. Portrait (610x764) crops the sides only, so the 42%
+   horizontal anchor keeps the worker centred in the narrow box. */
+#scene-1 .morph-photo {
+  border: 1px solid rgba(244, 240, 232, 0.14);
+}
+#scene-1 .morph-photo img {
+  object-fit: cover;
+  object-position: 42% 30%;
+}
+
+/* Question state: narrower column plus a deeper left shade so the headline
+   sits on darkness and the worker stays visible to the right of the text. */
+#scene-1 .morph-shade {
+  background: linear-gradient(90deg,
+    rgba(7, 9, 14, 0.94) 0%,
+    rgba(7, 9, 14, 0.78) 42%,
+    rgba(7, 9, 14, 0.30) 68%,
+    rgba(7, 9, 14, 0.08) 100%);
+}
+#scene-1 .morph-question-layer {
+  left: 84px;
+  width: 880px;
+}
+#scene-1 .morph-question-layer .headline {
+  font-size: 64px;
+  max-width: 16ch;
+  text-wrap: balance;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.8);
+}
+#scene-1 .morph-question-layer .dek {
+  max-width: 40ch;
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.8);
+}
+#scene-1 .hook-cue {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  align-self: flex-start;
+  margin-top: 28px;
+  padding: 10px 18px;
+  font-family: var(--mono);
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  background: rgba(14, 19, 29, 0.82);
+  border: 1px solid rgba(244, 240, 232, 0.16);
+}
+#scene-1 .hook-cue-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gold);
+  flex: none;
+}
+
+/* Reveal state: a neutral card so the right side never reads as blank. The
+   photo keeps the worker; the card carries the answer. */
+#scene-1 .morph-reveal-layer {
+  left: 724px;
+  right: 68px;
+  top: 50%;
+  bottom: auto;
+  transform: translateY(-50%);
+  max-height: calc(100% - 136px);
+  justify-content: flex-start;
+  gap: 0;
+  background: rgba(13, 18, 28, 0.92);
+  border: 1px solid rgba(244, 240, 232, 0.14);
+  padding: 40px 44px;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.5);
+}
+#scene-1 .hook-answer-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  margin-bottom: 10px;
+}
+#scene-1 .giant-five {
+  font-size: 108px;
+  line-height: 0.9;
+  margin-bottom: 0;
+}
+#scene-1 .hook-answer-note {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  padding-bottom: 18px;
+  max-width: 18ch;
+  line-height: 1.5;
+}
+#scene-1 .morph-reveal-layer .headline {
+  font-size: 33px;
+  line-height: 1.18;
+  margin-bottom: 12px;
+  text-wrap: balance;
+}
+#scene-1 .morph-reveal-layer .dek {
+  font-size: 17px;
+  line-height: 1.5;
+  max-width: 52ch;
+}
+#scene-1 .morph-metrics {
+  gap: 14px;
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(244, 240, 232, 0.16);
+}
+#scene-1 .morph-metric-card {
+  border: 1px solid rgba(244, 240, 232, 0.14);
+  padding: 14px 16px;
+}
+#scene-1 .morph-metric-card .val {
+  font-size: 27px;
+  margin-bottom: 4px;
+}
+#scene-1 .morph-metric-card .lbl {
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: var(--muted);
+}
