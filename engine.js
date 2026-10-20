@@ -221,6 +221,9 @@
         hi.style.top = c.y - 3 + "px";
       }
       connLayer.appendChild(hi);
+      // Where the traveller starts, measured from its anchor.
+      c.startOffset = c.vertical ? 0 : c.x1 - Math.min(c.x1, c.x2);
+      c.endOffset = c.vertical ? c.len : c.x2 - Math.min(c.x1, c.x2);
       connEls[pid] = hi;
 
       const node = document.createElement("div");
@@ -547,34 +550,38 @@
 
   /* ---- Connector highlight: a short bright segment that travels the conduit ---- */
   let pulseTimer = null;
+  const CONCURRENT = 4;
   function pulseConnectors() {
     if (!canAnimate()) return;
     const branches = Object.keys(connEls).filter((k) => k !== "spine");
     let i = 0;
     const step = () => {
-      branches.forEach((k) => {
-        const el = connEls[k];
-        if (!el) return;
+      // Light several conduits at once, staggered, so the whole network
+      // reads as carrying power rather than one dot crawling.
+      for (let n = 0; n < CONCURRENT; n++) {
+        const key = branches[(i + n) % branches.length];
+        const el = connEls[key];
+        if (!el) continue;
+        const c = connFor(+key);
+        const dist = c.len;
         el.style.opacity = "0";
         el.style.transform = "translateX(0)";
-      });
-      const el = connEls[branches[i % branches.length]];
-      if (el) {
-        const c = connFor(+branches[i % branches.length]);
-        const dist = c.vertical ? c.len : c.len;
-        el.style.opacity = "1";
         window.Motion.animate(
           0,
           1,
           {
-            duration: c.vertical ? 1.6 : 1.1,
+            duration: c.vertical ? 2.0 : 1.5,
+            delay: n * 0.16,
             ease: "easeInOut",
             onUpdate: (t) => {
+              // One animation drives both the travel and the fade envelope,
+              // so the two never fight over the same property.
+              el.style.opacity = String(Math.sin(Math.PI * Math.min(1, t * 1.08)));
+              const off = c.startOffset + (c.endOffset - c.startOffset) * t;
               if (c.vertical) {
-                el.style.transform = `translateY(${t * dist}px)`;
+                el.style.transform = `translateY(${off}px)`;
               } else {
-                const dir = c.x2 > c.x1 ? 1 : -1;
-                el.style.transform = `translateX(${dir * t * dist}px)`;
+                el.style.transform = `translateX(${off}px)`;
               }
             },
             onComplete: () => {
@@ -587,7 +594,7 @@
       i += 1;
     };
     step();
-    pulseTimer = setInterval(step, 2100);
+    pulseTimer = setInterval(step, 1500);
   }
 
   function stopPulses() {

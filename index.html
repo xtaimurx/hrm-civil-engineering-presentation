@@ -183,7 +183,7 @@
 
     .conn-hi {
       position: absolute;
-      width: 110px;
+      width: 360px;
       height: 6px;
       border-radius: 3px;
       opacity: 0;
@@ -839,6 +839,19 @@
     }
     body.is-canvas-finale .conn-node {
       background: var(--gold);
+      animation: nodeBreathe 2.6s ease-in-out infinite;
+    }
+    body.is-canvas-finale .conn-spine {
+      background: linear-gradient(180deg,
+        rgba(224, 169, 62, 0.25) 0%,
+        rgba(255, 214, 130, 0.9) 10%,
+        rgba(255, 214, 130, 0.9) 90%,
+        rgba(224, 169, 62, 0.25) 100%);
+      box-shadow: 0 0 40px rgba(224, 169, 62, 0.75);
+    }
+    @keyframes nodeBreathe {
+      0%, 100% { box-shadow: 0 0 0 rgba(224, 169, 62, 0); }
+      50% { box-shadow: 0 0 34px rgba(255, 214, 130, 0.95); }
     }
 
     /* Only the pane that is on camera is promoted to its own layer.
