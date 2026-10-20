@@ -150,8 +150,9 @@
   }
 
   function canvasTarget() {
-    // The whole canvas: building plus every pane.
-    return { x: GEO.axisX, y: 4500, s: fitScale(7600, 8700, 0.94) };
+    // The whole canvas: building plus every pane. Framed on the content
+    // bounds (the panes that overlap the tower) rather than the world box.
+    return { x: GEO.axisX, y: 4450, s: fitScale(6900, 8900, 0.995) };
   }
 
   function paneTarget(paneId) {
@@ -396,6 +397,8 @@
   function preZeroItems(root) {
     if (!root) return;
     root.querySelectorAll(".anim-item").forEach((item) => {
+      // Mark it as owned by the cascade so the parallax driver leaves it alone.
+      item.dataset.anim = "1";
       item.style.opacity = "0";
       item.style.transform = "translateY(24px)";
     });
@@ -417,7 +420,6 @@
       return;
     }
     items.forEach((item) => {
-      item.dataset.anim = "1";
       item.style.opacity = "0";
       item.style.transform = "translateY(24px)";
     });
@@ -428,7 +430,11 @@
         { duration: 0.56, delay: 0.06 + i * 0.065, ease: EASE }
       );
     });
-    setTimeout(() => items.forEach((item) => delete item.dataset.anim), 700 + items.length * 70);
+    setTimeout(() => {
+      items.forEach((item) => delete item.dataset.anim);
+      // hand the element back to the parallax driver
+      items.forEach((item) => (item.style.transform = ""));
+    }, 700 + items.length * 70);
   }
 
   function updateKenBurns(activePaneId) {
@@ -612,6 +618,35 @@
     return { x: GEO.axisX, y: clampedY, s: scale };
   }
 
+  // A plain two point move, used for the intro's beats (up to the spire, then
+  // back to the full canvas) where the tower waypoint is not wanted.
+  function flyTo(to, dur, onDone) {
+    if (camAnim) camAnim.stop();
+    camAnim = null;
+    const from = { ...cam };
+    const dist = Math.hypot(to.x - from.x, to.y - from.y);
+    const dip = dist > 600 ? 0.14 : 0;
+    const ls0 = Math.log(from.s);
+    const ls1 = Math.log(to.s);
+    document.body.classList.add("is-flying");
+    camAnim = window.Motion.animate(0, 1, {
+      duration: dur,
+      ease: [0.65, 0, 0.35, 1],
+      onUpdate: (t) => {
+        applyCam({
+          x: lerp(from.x, to.x, t),
+          y: lerp(from.y, to.y, t),
+          s: Math.exp(ls0 + (ls1 - ls0) * t - dip * Math.sin(Math.PI * t)),
+        });
+      },
+      onComplete: () => {
+        camAnim = null;
+        setTimeout(() => document.body.classList.remove("is-flying"), 320);
+        if (onDone) onDone();
+      },
+    });
+  }
+
   // Three phase flight: climb out to the building, drift slowly past it, then
   // settle into the target pane. The middle phase is the showcase.
   const PHASE_OUT = 0.36;
@@ -789,7 +824,7 @@
   }
 
   /* ---- Parallax: the tower has depth, and so does the active pane ---- */
-  const px = { x: 0, y: 0, tx: 0, ty: 0, blend: 1, moved: false };
+  const px = { x: 0, y: 0, tx: 0, ty: 0, blend: 0, moved: false };
   const depthCur = new WeakMap();
   let depthEls = [];
   let activePane = null;
@@ -826,7 +861,7 @@
       px.y += (px.ty - px.y) * 0.08;
       px.blend += (1 - px.blend) * 0.12;
     }
-    if (px.blend < 0.01) return;
+    if (px.blend < 0.005) return;
 
     // Tower depth layers (always present, on the canvas).
     const tower = document.getElementById("tower-3d");
