@@ -826,8 +826,10 @@
     }
 
     /* Canvas finale: the building fills the frame and the conduits light up. */
-    body.is-canvas-finale .deck-state-layer {
-      opacity: 0;
+    /* At the canvas finale the pane headlines stay visible: they let the
+       audience read the shape of the whole argument at a glance. */
+    body.is-canvas-finale .state-layer {
+      opacity: 1;
     }
     body.is-canvas-finale .conn-branch {
       background: linear-gradient(90deg,
