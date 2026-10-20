@@ -1,20 +1,21 @@
-/* v8 Engine.
-   Performance notes (this rewrite exists because v7 hitched):
-   - Media morphs use clip-path, never width/height/left/top. Animating layout
-     properties forced a full re-layout and re-raster of a 1600x900 image on
-     every frame. clip-path is composited.
-   - will-change is scoped to the active pane only. v7 promoted 13 large media
-     layers plus ~100 depth elements at once, which is what made the camera
-     flights stutter.
-   - Ken Burns runs on the active cover only, not on all 13 covers at once.
-   - The parallax driver caches its element list per activation instead of
-     querying the DOM every frame.
+/* v9 Engine.
 
-   Structure:
-   - 15 panes, 32 states. Every pane keeps one persistent .pane-media box.
-   - All panes stay populated, so canvas zooms show real photography.
-   - Entrances animate once from zero: items are zeroed before their layer is
-     revealed.
+   Structural changes over v8:
+   - One continuous canvas built around a dominant Empire State Building.
+     Panes overlap the tower's faces and every pane is wired to the building
+     with a conduit that runs out from the building's core.
+   - Connectors are HTML elements, not SVG. v8 used a world-sized SVG with
+     drop-shadow filters on animated strokes: Chrome re-rasterised the
+     filtered surface every frame, which dropped the canvas finale to
+     3.7fps and made the dashes shimmer as flickering boxes. HTML with
+     transforms only stays on the compositor.
+   - The tower is three depth layers inside a perspective container, so it
+     responds to the cursor instead of being a flat poster.
+   - Transitions route through the tower: pull back, dwell on the building,
+     then settle into the target pane.
+   - Photographs are decoded before the show starts, and the canvas finale
+     swaps in low-resolution thumbnails so the overview does not force a
+     full-resolution rasterisation burst.
 */
 (function () {
   document.addEventListener("error", (e) => {
@@ -35,44 +36,59 @@
     for (let k = 0; k < n; k++) FLAT.push({ pane: s.id, state: k });
   });
 
+  /* ---- Canvas geometry (Option B: panes overlap the tower's faces) ---- */
+  const GEO = {
+    worldW: 8200,
+    worldH: 9000,
+    towerX: 2100,          // tower left edge
+    towerW: 4000,          // 4000 / 6500 = 0.6154, matches the 985x1600 source
+    towerTop: 1400,
+    towerH: 6500,
+    axisX: 4100,           // tower centreline, the conduit spine
+    paneLeftX: 1700,       // left pane centres, overlapping the tower's face
+    paneRightX: 6500,
+    hookX: 4100,
+    hookY: 8400,
+    finX: 4100,
+    finY: 500,
+    rows: [7000, 5900, 4800, 3700, 2600, 1500],
+    rowPitch: 1150,
+  };
+  const TOWER_BOTTOM = GEO.towerTop + GEO.towerH;
+
   const world = document.getElementById("world");
   const viewport = document.getElementById("viewport");
   const scenesLayer = document.getElementById("scenes-layer");
-  const calloutGroup = document.getElementById("callout-lines");
-  const activeBeam = document.getElementById("active-beam");
+  const connLayer = document.getElementById("conn-layer");
   const counterEl = document.getElementById("scene-counter");
   const soundBtn = document.getElementById("btn-sound");
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const instantMode = location.search.includes("instant");
-  const svgNS = "http://www.w3.org/2000/svg";
   const sceneEls = {};
   const paneOrder = [];
+  const connEls = {};
+  const liveAnims = new Map();
 
   const canAnimate = () => !instantMode && !reduced && !!window.Motion;
   const lerp = (a, b, t) => a + (b - a) * t;
-  const CLIP_EASE = [0.22, 1, 0.36, 1];
+  const EASE = [0.22, 1, 0.36, 1];
 
-  /* Media keyframes per pane and state.
-     clip = [top, right, bottom, left] inset in px on a fixed 1600x900 box.
-     imgX/imgY/imgScale reframe the photograph inside that window.
-     scrim = 0..1 darkening applied over the photo.
-     sub  = optional second still (P12 only), same clip convention. */
   const MEDIA_STATES = {
     3: [
-      { clip: [0, 0, 0, 0], imgScale: 1, imgX: 0, imgY: 0, scrim: 0.22 },
+      { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, pos: "50% 18%", scrim: 0.22 },
       { clip: [176, 84, 300, 84], imgScale: 1.04, imgX: -30, imgY: -40, scrim: 0.08 },
     ],
     4: [
-      { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, scrim: 0.30 },
+      { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, pos: "30% 42%", scrim: 0.30 },
       { clip: [0, 880, 0, 0], imgScale: 1, imgX: 0, imgY: 0, scrim: 0.10 },
     ],
     5: [
-      { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, scrim: 0.30 },
+      { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, pos: "50% 38%", scrim: 0.30 },
       { clip: [0, 1160, 0, 0], imgScale: 1.12, imgX: 120, imgY: 0, scrim: 0.12 },
       { clip: [0, 0, 0, 1160], imgScale: 1.2, imgX: -140, imgY: 0, scrim: 0.12 },
     ],
     6: [
-      { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, scrim: 0.28 },
+      { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, pos: "50% 8%", scrim: 0.28 },
       { clip: [0, 0, 0, 912], imgScale: 1, imgX: 0, imgY: 0, scrim: 0.10 },
     ],
     7: [
@@ -81,25 +97,25 @@
       { clip: [52, 150, 744, 150], imgScale: 1.06, imgX: 0, imgY: -478, pos: "50% 0%", scrim: 0.16 },
     ],
     8: [
-      { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, scrim: 0.32 },
+      { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, pos: "50% 28%", scrim: 0.32 },
       { clip: [0, 1170, 0, 0], imgScale: 1, imgX: 0, imgY: 0, pos: "50% 30%", scrim: 0.10 },
     ],
     9: [
-      { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, scrim: 0.34 },
+      { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, pos: "50% 52%", scrim: 0.34 },
       { clip: [0, 992, 0, 0], imgScale: 1, imgX: 0, imgY: 0, scrim: 0.12 },
     ],
     10: [
-      { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, scrim: 0.32 },
+      { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, pos: "50% 24%", scrim: 0.32 },
       { clip: [0, 1160, 0, 0], imgScale: 1, imgX: 0, imgY: 0, scrim: 0.12 },
       { clip: [0, 0, 0, 1160], imgScale: 1.06, imgX: 0, imgY: 0, scrim: 0.12 },
     ],
     11: [
-      { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, scrim: 0.28 },
+      { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, pos: "62% 40%", scrim: 0.28 },
       { clip: [0, 0, 0, 920], imgScale: 1, imgX: 0, imgY: 0, scrim: 0.10 },
     ],
     12: [
       {
-        clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, scrim: 0.30,
+        clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, pos: "58% 42%", scrim: 0.30,
         sub: { clip: [576, 1008, 0, 0], opacity: 0 },
       },
       {
@@ -108,12 +124,12 @@
       },
     ],
     13: [
-      { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, scrim: 0.32 },
+      { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, pos: "50% 28%", scrim: 0.32 },
       { clip: [0, 1160, 0, 0], imgScale: 1.14, imgX: 60, imgY: 0, pos: "30% 30%", scrim: 0.12 },
       { clip: [0, 0, 0, 1160], imgScale: 1.22, imgX: -80, imgY: 0, pos: "70% 30%", scrim: 0.12 },
     ],
     14: [
-      { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, scrim: 0.24 },
+      { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, pos: "50% 36%", scrim: 0.24 },
       { clip: [0, 0, 0, 900], imgScale: 1, imgX: 0, imgY: 0, scrim: 0.10 },
     ],
     15: [{ clip: [0, 0, 0, 0], imgScale: 1.0, imgX: 0, imgY: 0, pos: "50% 0%", scrim: 0.32 }],
@@ -124,15 +140,18 @@
   }
 
   function introTarget() {
-    return { x: 4800, y: 3800, s: viewport.clientHeight / 2000 };
+    // Base of the building, seen from street level.
+    return { x: GEO.axisX, y: TOWER_BOTTOM + 650, s: viewport.clientHeight / 1900 };
   }
 
   function spireTarget() {
-    return { x: 4800, y: 2250, s: viewport.clientHeight / 2900 };
+    // The mast and the upper setbacks.
+    return { x: GEO.axisX, y: GEO.towerTop + 1000, s: viewport.clientHeight / 2400 };
   }
 
   function canvasTarget() {
-    return { x: 4800, y: 1400, s: fitScale(9000, 11000, 0.92) };
+    // The whole canvas: building plus every pane.
+    return { x: GEO.axisX, y: 4500, s: fitScale(7600, 8700, 0.94) };
   }
 
   function paneTarget(paneId) {
@@ -141,33 +160,75 @@
     return { x: s.x, y: s.y, s: fitScale(1600, 900, 0.9) };
   }
 
-  SCENES.forEach((s) => {
-    if (s.isCanvasFinale) return;
-    const towerX = s.x < 4800 ? 3500 : s.x > 4800 ? 6100 : 4800;
-    const anchorY = s.id === 15 ? 450 : Math.max(700, Math.min(4600, s.y));
-    const midX = (towerX + s.x) / 2;
-    s._beamPath =
-      s.x === 4800
-        ? `M 4800 ${s.id === 15 ? 450 : 4675} L 4800 ${s.y}`
-        : `M ${towerX} ${anchorY} L ${midX} ${anchorY} L ${s.x} ${s.y}`;
+  /* ---- Connector geometry ---- */
+  function connFor(paneId) {
+    const s = byId[paneId];
+    if (paneId === 1) {
+      return { x1: GEO.axisX, x2: GEO.axisX, y: GEO.hookY, vertical: true, len: 900 };
+    }
+    if (paneId === 15) {
+      return { x1: GEO.axisX, x2: GEO.axisX, y: GEO.finY, vertical: true, len: 800 };
+    }
+    const y = s.y;
+    const left = s.x < GEO.axisX;
+    const x1 = GEO.axisX;
+    const x2 = left ? s.x - 800 : s.x + 800;
+    return { x1, x2, y, vertical: false, len: Math.abs(x2 - x1) };
+  }
 
-    const path = document.createElementNS(svgNS, "path");
-    path.setAttribute("d", s._beamPath);
-    path.setAttribute("class", "callout-base");
-    calloutGroup.appendChild(path);
+  function buildConnectors() {
+    // Central spine running the full height of the building.
+    const spine = document.createElement("div");
+    spine.className = "conn-spine";
+    spine.style.left = GEO.axisX + "px";
+    spine.style.top = GEO.finY + "px";
+    spine.style.height = GEO.hookY - GEO.finY + "px";
+    connLayer.appendChild(spine);
 
-    const pulse = document.createElementNS(svgNS, "path");
-    pulse.setAttribute("d", s._beamPath);
-    pulse.setAttribute("class", "callout-pulse");
-    calloutGroup.appendChild(pulse);
+    const spineHi = document.createElement("div");
+    spineHi.className = "conn-spine-hi";
+    spineHi.style.left = GEO.axisX + "px";
+    spineHi.style.top = GEO.finY + "px";
+    connLayer.appendChild(spineHi);
+    connEls.spine = spineHi;
 
-    const dot = document.createElementNS(svgNS, "circle");
-    dot.setAttribute("cx", towerX);
-    dot.setAttribute("cy", anchorY);
-    dot.setAttribute("r", 18);
-    dot.setAttribute("class", "anchor-node");
-    calloutGroup.appendChild(dot);
-  });
+    paneOrder.concat([15]).forEach((pid) => {
+      const c = connFor(pid);
+      const el = document.createElement("div");
+      el.className = "conn-branch";
+      if (c.vertical) {
+        el.style.left = c.x1 + "px";
+        el.style.top = c.y + "px";
+        el.style.width = "6px";
+        el.style.height = c.len + "px";
+      } else {
+        el.style.left = Math.min(c.x1, c.x2) + "px";
+        el.style.top = c.y - 3 + "px";
+        el.style.width = c.len + "px";
+        el.style.height = "6px";
+      }
+      connLayer.appendChild(el);
+
+      const hi = document.createElement("div");
+      hi.className = "conn-hi";
+      hi.dataset.pane = pid;
+      if (c.vertical) {
+        hi.style.left = c.x1 + "px";
+        hi.style.top = c.y + "px";
+      } else {
+        hi.style.left = Math.min(c.x1, c.x2) + "px";
+        hi.style.top = c.y - 3 + "px";
+      }
+      connLayer.appendChild(hi);
+      connEls[pid] = hi;
+
+      const node = document.createElement("div");
+      node.className = "conn-node";
+      node.style.left = c.x1 + "px";
+      node.style.top = c.y + "px";
+      connLayer.appendChild(node);
+    });
+  }
 
   function buildScenes() {
     const s1 = byId[1];
@@ -190,15 +251,23 @@
       el.style.left = s.x + "px";
       el.style.top = s.y + "px";
 
+      const thumb = s.image.replace("assets/", "assets/thumbs/");
       let mediaHtml = `
         <div class="pane-media" data-depth="bg">
-          <div class="pane-frame"><img class="pane-img" src="${s.image}" alt="" /></div>
+          <div class="pane-frame">
+            <img class="pane-img" src="${s.image}" alt="" />
+            <img class="pane-thumb" src="${thumb}" alt="" />
+          </div>
           <div class="pane-scrim"></div>
         </div>`;
       if (s.image2) {
+        const subThumb = s.image2.replace("assets/", "assets/thumbs/");
         mediaHtml += `
           <div class="pane-media-sub" data-depth="bg">
-            <div class="pane-frame"><img class="pane-sub-img" src="${s.image2}" alt="" /></div>
+            <div class="pane-frame">
+              <img class="pane-sub-img" src="${s.image2}" alt="" />
+              <img class="pane-sub-thumb" src="${subThumb}" alt="" />
+            </div>
           </div>`;
       }
 
@@ -207,9 +276,6 @@
       for (let k = 0; k < n; k++) {
         const fn = window.SCENE_RENDER && window.SCENE_RENDER[s.id];
         const onClass = k === 0 ? " is-on" : "";
-        // The pane's photograph is owned by the persistent .pane-media primitive.
-        // Drop any duplicate <img> the slide renderer emitted: it would decode
-        // the file a second time and carry a stray Ken Burns animation.
         const inner = fn ? fn(s, k).replace(/<img[^>]*>/g, "") : "";
         layersHtml += `<div class="state-layer${onClass}" data-state="${k}">${inner}</div>`;
       }
@@ -220,10 +286,25 @@
       paneOrder.push(s.id);
       applyMediaState(s.id, 0, false);
     });
+
+    // The hook pane keeps its own photograph; give it a thumbnail too.
+    const hookImg = document.querySelector("#hook-photo img");
+    if (hookImg) {
+      const t = document.createElement("img");
+      t.className = "pane-thumb hook-thumb";
+      t.src = hookImg.src.replace("assets/", "assets/thumbs/");
+      hookImg.parentNode.insertBefore(t, hookImg.nextSibling);
+    }
   }
 
-  // Morph the persistent media window. Uses clip-path only, so no layout work
-  // happens per frame.
+  function stopAnim(key) {
+    const a = liveAnims.get(key);
+    if (a) {
+      a.stop();
+      liveAnims.delete(key);
+    }
+  }
+
   function applyMediaState(paneId, st, animate) {
     const el = sceneEls[paneId];
     const table = MEDIA_STATES[paneId];
@@ -246,6 +327,8 @@
     if (cfg.pos) img.style.objectPosition = cfg.pos;
 
     if (dur === 0) {
+      stopAnim("clip" + paneId);
+      stopAnim("img" + paneId);
       setClip(to);
       img.style.transform = `translate(${cfg.imgX || 0}px, ${cfg.imgY || 0}px) scale(${cfg.imgScale || 1})`;
       if (scrim) scrim.style.opacity = String(cfg.scrim ?? 0.3);
@@ -256,24 +339,24 @@
       return;
     }
 
-    window.Motion.animate(0, 1, {
+    stopAnim("clip" + paneId);
+    stopAnim("img" + paneId);
+    const a1 = window.Motion.animate(0, 1, {
       duration: dur,
-      ease: CLIP_EASE,
+      ease: EASE,
       onUpdate: (t) => {
         const c = from.map((v, i) => lerp(v, to[i], t));
         box.style.clipPath = `inset(${c[0]}px ${c[1]}px ${c[2]}px ${c[3]}px)`;
       },
       onComplete: () => setClip(to),
     });
-    window.Motion.animate(
+    liveAnims.set("clip" + paneId, a1);
+    const a2 = window.Motion.animate(
       img,
-      {
-        x: cfg.imgX || 0,
-        y: cfg.imgY || 0,
-        scale: cfg.imgScale || 1,
-      },
-      { duration: dur, ease: CLIP_EASE }
+      { x: cfg.imgX || 0, y: cfg.imgY || 0, scale: cfg.imgScale || 1 },
+      { duration: dur, ease: EASE }
     );
+    liveAnims.set("img" + paneId, a2);
     if (scrim) {
       window.Motion.animate(scrim, { opacity: cfg.scrim ?? 0.3 }, { duration: dur });
     }
@@ -284,19 +367,20 @@
           opacity: cfg.sub.opacity,
           clipPath: `inset(${cfg.sub.clip[0]}px ${cfg.sub.clip[1]}px ${cfg.sub.clip[2]}px ${cfg.sub.clip[3]}px)`,
         },
-        { duration: dur, ease: CLIP_EASE }
+        { duration: dur, ease: EASE }
       );
     }
   }
 
   buildScenes();
+  buildConnectors();
 
   const hookPhoto = document.getElementById("hook-photo");
   const hookShade = document.getElementById("hook-shade");
   const hookQ = document.getElementById("hook-q");
   const hookR = document.getElementById("hook-r");
 
-  let cam = { x: 4800, y: 3800, s: 0.45 };
+  let cam = { x: GEO.axisX, y: TOWER_BOTTOM + 650, s: 0.46 };
   let camAnim = null;
   let current = -1;
   let seq = 0;
@@ -341,13 +425,12 @@
       window.Motion.animate(
         item,
         { opacity: [0, 1], transform: ["translateY(24px)", "translateY(0px)"] },
-        { duration: 0.56, delay: 0.06 + i * 0.065, ease: CLIP_EASE }
+        { duration: 0.56, delay: 0.06 + i * 0.065, ease: EASE }
       );
     });
     setTimeout(() => items.forEach((item) => delete item.dataset.anim), 700 + items.length * 70);
   }
 
-  // Ken Burns only on the pane that is actually on camera.
   function updateKenBurns(activePaneId) {
     paneOrder.forEach((pid) => {
       const el = sceneEls[pid];
@@ -381,7 +464,7 @@
     }
 
     preZeroItems(incoming);
-    window.Motion.animate(hookPhoto, photoTo, { duration: dur, ease: CLIP_EASE });
+    window.Motion.animate(hookPhoto, photoTo, { duration: dur, ease: EASE });
     window.Motion.animate(hookShade, { opacity: toReveal ? 0.18 : 1 }, { duration: dur });
     setTimeout(() => {
       if (id !== seq) return;
@@ -442,8 +525,6 @@
     }
   }
 
-  // Reset every pane to its cover state. Used by the canvas finale so the
-  // overview reads as a wall of photography instead of text boxes.
   function resetAllToCovers(animate) {
     paneOrder.forEach((pid) => {
       if (pid === 1) return;
@@ -455,57 +536,119 @@
         l.classList.toggle("is-on", i === 0);
         l.style.opacity = "";
       });
-      if (animate && canAnimate()) {
-        const l0 = layers[0];
-        preZeroItems(l0);
-        cascadeItems(l0);
+    });
+  }
+
+  /* ---- Connector highlight: a short bright segment that travels the conduit ---- */
+  let pulseTimer = null;
+  function pulseConnectors() {
+    if (!canAnimate()) return;
+    const branches = Object.keys(connEls).filter((k) => k !== "spine");
+    let i = 0;
+    const step = () => {
+      branches.forEach((k) => {
+        const el = connEls[k];
+        if (!el) return;
+        el.style.opacity = "0";
+        el.style.transform = "translateX(0)";
+      });
+      const el = connEls[branches[i % branches.length]];
+      if (el) {
+        const c = connFor(+branches[i % branches.length]);
+        const dist = c.vertical ? c.len : c.len;
+        el.style.opacity = "1";
+        window.Motion.animate(
+          0,
+          1,
+          {
+            duration: c.vertical ? 1.6 : 1.1,
+            ease: "easeInOut",
+            onUpdate: (t) => {
+              if (c.vertical) {
+                el.style.transform = `translateY(${t * dist}px)`;
+              } else {
+                const dir = c.x2 > c.x1 ? 1 : -1;
+                el.style.transform = `translateX(${dir * t * dist}px)`;
+              }
+            },
+            onComplete: () => {
+              el.style.opacity = "0";
+              el.style.transform = "translateX(0)";
+            },
+          }
+        );
+      }
+      i += 1;
+    };
+    step();
+    pulseTimer = setInterval(step, 2100);
+  }
+
+  function stopPulses() {
+    if (pulseTimer) {
+      clearInterval(pulseTimer);
+      pulseTimer = null;
+    }
+    Object.values(connEls).forEach((el) => {
+      if (el) {
+        el.style.opacity = "0";
+        el.style.transform = "translateX(0)";
       }
     });
   }
 
-  let beamAnim = null;
-  function drawBeam(scene) {
-    const d = scene && scene._beamPath ? scene._beamPath : "";
-    activeBeam.setAttribute("d", d);
-    if (!d || !canAnimate()) return;
-    const len = activeBeam.getTotalLength();
-    activeBeam.style.strokeDasharray = `${len} ${len}`;
-    if (beamAnim) beamAnim.stop();
-    beamAnim = window.Motion.animate(len, 0, {
-      duration: 1.1,
-      ease: CLIP_EASE,
-      onUpdate: (v) => (activeBeam.style.strokeDashoffset = String(v)),
+  function highlightPaneConn(paneId) {
+    Object.entries(connEls).forEach(([k, el]) => {
+      if (!el) return;
+      el.classList.toggle("is-active", +k === paneId);
     });
   }
 
-  let bowFlip = 1;
-  function flyTo(to, dur, onDone) {
+  /* ---- Camera: a three phase flight that dwells on the building ---- */
+  function towerWaypoint(a, b) {
+    const midY = lerp(a.y, b.y, 0.5);
+    const clampedY = Math.max(GEO.towerTop + 850, Math.min(TOWER_BOTTOM - 850, midY));
+    const scale = (viewport.clientWidth * 0.72) / GEO.towerW;
+    return { x: GEO.axisX, y: clampedY, s: scale };
+  }
+
+  // Three phase flight: climb out to the building, drift slowly past it, then
+  // settle into the target pane. The middle phase is the showcase.
+  const PHASE_OUT = 0.36;
+  const PHASE_HOLD = 0.62;
+
+  const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+  const easeInOut = (t) =>
+    t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+  function flyToPane(target, from, dur, onDone) {
     if (camAnim) camAnim.stop();
     camAnim = null;
-    const from = { ...cam };
-    const dx = to.x - from.x;
-    const dy = to.y - from.y;
-    const dist = Math.hypot(dx, dy);
-    const nx = dist > 0 ? -dy / dist : 0;
-    const ny = dist > 0 ? dx / dist : 0;
-    const bow = Math.min(dist * 0.07, 420) * bowFlip;
-    bowFlip *= -1;
-    const mx = from.x + dx / 2 + nx * bow;
-    const my = from.y + dy / 2 + ny * bow;
-    const dip = dist > 600 ? 0.12 : 0;
-    const ls0 = Math.log(from.s);
-    const ls1 = Math.log(to.s);
+    const start = { ...cam };
+    const wp = towerWaypoint(from, target);
+    // While crossing the building, drift upward along its face.
+    const drift = { x: wp.x, y: wp.y - 320, s: wp.s * 1.06 };
     document.body.classList.add("is-flying");
     camAnim = window.Motion.animate(0, 1, {
       duration: dur,
-      ease: [0.65, 0, 0.35, 1],
-      onUpdate: (t) => {
-        const u = 1 - t;
-        applyCam({
-          x: u * u * from.x + 2 * u * t * mx + t * t * to.x,
-          y: u * u * from.y + 2 * u * t * my + t * t * to.y,
-          s: Math.exp(ls0 + (ls1 - ls0) * t - dip * Math.sin(Math.PI * t)),
-        });
+      ease: "linear",
+      onUpdate: (raw) => {
+        let p;
+        if (raw < PHASE_OUT) {
+          const u = easeOut(raw / PHASE_OUT);
+          p = { x: lerp(start.x, wp.x, u), y: lerp(start.y, wp.y, u) };
+          const ls = lerp(Math.log(start.s), Math.log(wp.s), u);
+          p.s = Math.exp(ls);
+        } else if (raw < PHASE_HOLD) {
+          const u = easeInOut((raw - PHASE_OUT) / (PHASE_HOLD - PHASE_OUT));
+          p = { x: lerp(wp.x, drift.x, u), y: lerp(wp.y, drift.y, u) };
+          p.s = Math.exp(lerp(Math.log(wp.s), Math.log(drift.s), u));
+        } else {
+          const u = easeInOut((raw - PHASE_HOLD) / (1 - PHASE_HOLD));
+          p = { x: lerp(drift.x, target.x, u), y: lerp(drift.y, target.y, u) };
+          p.s = Math.exp(lerp(Math.log(drift.s), Math.log(target.s), u));
+        }
+        applyCam(p);
       },
       onComplete: () => {
         camAnim = null;
@@ -517,17 +660,17 @@
 
   function introSequence(id, target, done) {
     const alive = () => id === seq;
-    flyTo(spireTarget(), 2.6, () => {
+    flyTo(spireTarget(), 2.8, () => {
       if (!alive()) return;
       setTimeout(() => {
         if (!alive()) return;
-        flyTo(canvasTarget(), 1.7, () => {
+        flyTo(canvasTarget(), 1.9, () => {
           if (!alive()) return;
           setTimeout(() => {
-            if (alive()) flyTo(target, 1.8, done);
-          }, 800);
+            if (alive()) flyToPane(target, canvasTarget(), 2.0, done);
+          }, 900);
         });
-      }, 1500);
+      }, 1600);
     });
   }
 
@@ -555,26 +698,25 @@
     counterEl.textContent = next === -1 ? "Start" : `${next + 1} / ${FLAT.length}`;
     history.replaceState(null, "", next === -1 ? location.pathname + location.search : `#${next + 1}`);
 
-    // State 32: the full illuminated canvas. Every pane drops back to its
-    // cover so the overview reads as photography, not as text panels.
     if (isCanvasFinale) {
-      activeBeam.setAttribute("d", "");
       resetAllToCovers(false);
       updateKenBurns(null);
+      stopPulses();
+      pulseConnectors();
       if (!canAnimate() || opts.instant) {
         applyCam(canvasTarget());
       } else {
-        flyTo(canvasTarget(), 2.1);
+        flyToPane(canvasTarget(), paneTarget(tgt.pane), 2.4);
         playWhoosh();
       }
       return;
     }
 
     updateKenBurns(tgt ? tgt.pane : null);
+    highlightPaneConn(tgt ? tgt.pane : -1);
 
     if (samePane) {
       activatePane(tgt.pane, tgt.state, { morph: true, instant: opts.instant }, id);
-      drawBeam(byId[tgt.pane]);
       return;
     }
 
@@ -618,11 +760,11 @@
           if (!canAnimate() || opts.instant) showItemsInstant(layer);
           else cascadeItems(layer);
         }
-        drawBeam(byId[tgt.pane]);
       }
     };
 
     const target = next === -1 ? introTarget() : paneTarget(tgt.pane);
+    const from = prev >= 0 ? paneTarget(prv.pane) : introTarget();
     const runIntro =
       prev === -1 &&
       tgt &&
@@ -641,12 +783,12 @@
       applyCam(target);
       landed();
     } else {
-      flyTo(target, 1.3, landed);
+      flyToPane(target, from, 2.3, landed);
     }
     if (!opts.instant && tgt) playWhoosh();
   }
 
-  // ---- Parallax driver: cached element list, idle when the mouse is still ----
+  /* ---- Parallax: the tower has depth, and so does the active pane ---- */
   const px = { x: 0, y: 0, tx: 0, ty: 0, blend: 1, moved: false };
   const depthCur = new WeakMap();
   let depthEls = [];
@@ -658,11 +800,20 @@
     depthEls = el ? Array.from(el.querySelectorAll("[data-depth]")) : [];
   }
 
+  function setActivePane(id) {
+    if (id === lastActive) return;
+    lastActive = id;
+    activePane = id;
+    cacheDepthEls();
+  }
+
   window.addEventListener("mousemove", (e) => {
     px.tx = e.clientX / window.innerWidth - 0.5;
     px.ty = e.clientY / window.innerHeight - 0.5;
     px.moved = true;
   });
+
+  const DEPTH = { sky: 34, bg: 46, mid: 78, fg: 120 };
 
   function parallaxTick() {
     requestAnimationFrame(parallaxTick);
@@ -676,27 +827,37 @@
       px.blend += (1 - px.blend) * 0.12;
     }
     if (px.blend < 0.01) return;
-    if (!activePane) return;
+
+    // Tower depth layers (always present, on the canvas).
+    const tower = document.getElementById("tower-3d");
+    if (tower) {
+      const ry = (px.x * 5.2 * px.blend).toFixed(3);
+      const rx = (-px.y * 2.6 * px.blend).toFixed(3);
+      tower.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+    }
 
     for (let i = 0; i < depthEls.length; i++) {
       const el = depthEls[i];
       if (el.dataset.anim) continue;
-      const f = { bg: 28, mid: 52, fg: 84 }[el.dataset.depth] || 36;
-      const tx = Math.max(-48, Math.min(48, -px.x * f * px.blend));
-      const ty = Math.max(-36, Math.min(36, -px.y * f * px.blend));
+      const f = DEPTH[el.dataset.depth] || 40;
+      const tx = Math.max(-70, Math.min(70, -px.x * f * px.blend));
+      const ty = Math.max(-50, Math.min(50, -px.y * f * px.blend));
       let cur = depthCur.get(el);
       if (!cur) {
         cur = { x: 0, y: 0 };
         depthCur.set(el, cur);
       }
-      cur.x += (tx - cur.x) * 0.18;
-      cur.y += (ty - cur.y) * 0.18;
+      cur.x += (tx - cur.x) * 0.16;
+      cur.y += (ty - cur.y) * 0.16;
       el.style.transform = `translate3d(${cur.x.toFixed(2)}px, ${cur.y.toFixed(2)}px, 0)`;
     }
-    const rx = (-px.y * 4.2 * px.blend).toFixed(3);
-    const ry = (px.x * 4.2 * px.blend).toFixed(3);
-    const el = sceneEls[activePane];
-    if (el) el.style.transform = `perspective(1600px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+
+    const el = activePane ? sceneEls[activePane] : null;
+    if (el) {
+      const rx = (-px.y * 3.4 * px.blend).toFixed(3);
+      const ry = (px.x * 3.4 * px.blend).toFixed(3);
+      el.style.transform = `perspective(1800px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+    }
   }
   if (!instantMode && !reduced) requestAnimationFrame(parallaxTick);
 
@@ -779,14 +940,34 @@
 
   soundBtn.addEventListener("click", toggleSound);
 
-  // Decode every photograph up front. A JPEG decode landing mid-transition is a
-  // classic source of first-press stutter on a deployed site.
+  /* ---- Decode every photograph before the show starts ---- */
   function warmImages() {
     const imgs = Array.from(document.images);
     let pending = imgs.length;
-    const done = () => { pending -= 1; if (pending <= 0) document.body.classList.add("images-ready"); };
+    const finish = () => {
+      document.body.classList.add("images-ready");
+      const loader = document.getElementById("loader");
+      if (loader) loader.classList.add("is-done");
+    };
+    // Never let the loader hold the show hostage on a slow connection.
+    setTimeout(finish, 4000);
+    if (instantMode) {
+      finish();
+      return;
+    }
+    if (!pending) {
+      finish();
+      return;
+    }
+    const done = () => {
+      pending -= 1;
+      if (pending <= 0) finish();
+    };
     imgs.forEach((img) => {
-      if (img.complete) { done(); return; }
+      if (img.complete && img.naturalWidth > 0) {
+        done();
+        return;
+      }
       if (img.decode) {
         img.decode().then(done).catch(done);
       } else {
@@ -803,13 +984,5 @@
     goTo(startHash - 1, { instant: true });
   } else {
     applyCam(introTarget());
-  }
-
-  // Keep the parallax cache in step with the active pane.
-  function setActivePane(id) {
-    if (id === lastActive) return;
-    lastActive = id;
-    activePane = id;
-    cacheDepthEls();
   }
 })();

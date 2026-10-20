@@ -45,24 +45,31 @@
       position: absolute;
       left: 0;
       top: 0;
-      width: 9600px;
-      height: 7600px;
+      width: 8200px;
+      height: 9000px;
       transform-origin: 0 0;
-      will-change: transform;
+    }
+
+    /* The drafting grid covers the whole frame, so the space around the
+       building reads as canvas rather than void. */
+    #grid {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
       background-image:
         linear-gradient(rgba(180, 205, 245, 0.045) 1px, transparent 1px),
         linear-gradient(90deg, rgba(180, 205, 245, 0.045) 1px, transparent 1px),
-        linear-gradient(rgba(224, 169, 62, 0.07) 2px, transparent 2px),
-        linear-gradient(90deg, rgba(224, 169, 62, 0.07) 2px, transparent 2px);
+        linear-gradient(rgba(224, 169, 62, 0.06) 2px, transparent 2px),
+        linear-gradient(90deg, rgba(224, 169, 62, 0.06) 2px, transparent 2px);
       background-size: 80px 80px, 80px 80px, 400px 400px, 400px 400px;
     }
 
     .tower-monument {
       position: absolute;
-      left: 3500px;
-      top: 450px;
-      width: 2600px;
-      height: 4225px;
+      inset: 0;
+      width: 4000px;
+      height: 6500px;
       background: #090c12;
       border: 3px solid rgba(224, 169, 62, 0.55);
       box-shadow: 0 80px 240px rgba(0, 0, 0, 0.92), 0 0 120px rgba(224, 169, 62, 0.12);
@@ -89,15 +96,16 @@
 
     .tower-poster-header {
       position: absolute;
-      left: 90px;
-      right: 90px;
-      top: 80px;
+      left: 620px;
+      right: 620px;
+      top: 135px;
       display: flex;
       justify-content: space-between;
+      gap: 60px;
       border-bottom: 2px solid rgba(224, 169, 62, 0.5);
-      padding-bottom: 28px;
+      padding-bottom: 52px;
       font-family: var(--mono);
-      font-size: 28px;
+      font-size: 44px;
       letter-spacing: 0.08em;
     }
 
@@ -105,69 +113,147 @@
 
     .tower-poster-footer {
       position: absolute;
-      left: 90px;
-      right: 90px;
-      bottom: 90px;
-      padding-top: 36px;
+      left: 620px;
+      right: 620px;
+      bottom: 145px;
+      padding-top: 56px;
       border-top: 2px solid rgba(224, 169, 62, 0.55);
       display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 26px;
     }
 
     .tower-poster-footer h2 {
       font-family: var(--serif);
-      font-size: 88px;
+      font-size: 136px;
       font-weight: 400;
       line-height: 1.05;
     }
 
     .tower-poster-footer p {
-      font-size: 34px;
+      font-size: 52px;
       color: var(--gold);
-      margin-top: 12px;
+      margin-top: 18px;
     }
 
-    .tower-poster-stats { display: flex; gap: 64px; text-align: right; }
+    .tower-poster-stats { display: flex; gap: 90px; text-align: right; }
 
     .tower-poster-stats .num {
       font-family: var(--serif);
-      font-size: 76px;
+      font-size: 120px;
       color: var(--gold);
       line-height: 1;
     }
 
-    .tower-poster-stats .lbl { font-size: 24px; margin-top: 8px; }
+    .tower-poster-stats .lbl { font-size: 38px; margin-top: 12px; }
 
-    #callout-svg {
+    /* ---- Connector conduits (HTML, transform-only, no filters) ---- */
+    #conn-layer {
       position: absolute;
       left: 0;
       top: 0;
-      width: 9600px;
-      height: 7600px;
+      width: 8200px;
+      height: 9000px;
       pointer-events: none;
-      z-index: 4;
+      z-index: 3;
     }
 
-    .callout-base {
-      fill: none;
-      stroke: rgba(224, 169, 62, 0.24);
-      stroke-width: 4;
-      stroke-dasharray: 14 12;
+    .conn-spine {
+      position: absolute;
+      width: 8px;
+      background: linear-gradient(180deg,
+        rgba(224, 169, 62, 0.12) 0%,
+        rgba(224, 169, 62, 0.78) 10%,
+        rgba(224, 169, 62, 0.78) 90%,
+        rgba(224, 169, 62, 0.12) 100%);
+      box-shadow: 0 0 26px rgba(224, 169, 62, 0.45);
     }
 
-    .callout-active {
-      fill: none;
-      stroke: var(--gold);
-      stroke-width: 7;
-      stroke-linecap: round;
-      filter: drop-shadow(0 0 18px rgba(224, 169, 62, 0.8));
+    .conn-branch {
+      position: absolute;
+      background: linear-gradient(90deg,
+        rgba(224, 169, 62, 0.22) 0%,
+        rgba(255, 206, 122, 0.92) 50%,
+        rgba(224, 169, 62, 0.22) 100%);
+      box-shadow: 0 0 20px rgba(224, 169, 62, 0.5);
     }
 
-    .anchor-node {
-      fill: var(--bg);
-      stroke: var(--gold);
-      stroke-width: 6;
+    .conn-hi {
+      position: absolute;
+      width: 110px;
+      height: 6px;
+      border-radius: 3px;
+      opacity: 0;
+      background: linear-gradient(90deg,
+        rgba(224, 169, 62, 0) 0%,
+        rgba(255, 214, 130, 0.95) 50%,
+        rgba(224, 169, 62, 0) 100%);
+      box-shadow: 0 0 22px rgba(224, 169, 62, 0.75);
+      will-change: transform, opacity;
+    }
+
+    .conn-hi.is-active {
+      opacity: 0.9;
+    }
+
+    .conn-node {
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      margin-left: -11px;
+      margin-top: -11px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 3px solid rgba(224, 169, 62, 0.75);
+    }
+
+    /* ---- The tower, in depth ---- */
+    .tower-3d {
+      position: absolute;
+      left: 2100px;
+      top: 1400px;
+      width: 4000px;
+      height: 6500px;
+      perspective: 2400px;
+      perspective-origin: 50% 42%;
+      z-index: 2;
+    }
+
+    .tower-sky {
+      position: absolute;
+      left: -1700px;
+      top: -900px;
+      width: 7400px;
+      height: 8300px;
+      background:
+        radial-gradient(46% 34% at 50% 30%,
+          rgba(224, 169, 62, 0.17) 0%,
+          rgba(120, 160, 220, 0.08) 40%,
+          rgba(7, 9, 14, 0) 70%),
+        radial-gradient(70% 52% at 50% 55%,
+          rgba(46, 90, 150, 0.10) 0%,
+          rgba(7, 9, 14, 0) 68%);
+    }
+
+    .tower-slab {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+    }
+
+    .tower-haze {
+      position: absolute;
+      left: -500px;
+      top: -290px;
+      width: 5000px;
+      height: 7100px;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, rgba(7, 9, 14, 0.55) 0%, rgba(7, 9, 14, 0) 16%,
+                                rgba(7, 9, 14, 0) 84%, rgba(7, 9, 14, 0.55) 100%),
+        linear-gradient(180deg, rgba(7, 9, 14, 0.75) 0%, rgba(7, 9, 14, 0) 14%,
+                                rgba(7, 9, 14, 0) 86%, rgba(7, 9, 14, 0.8) 100%);
     }
 
     .scene {
@@ -548,6 +634,40 @@
 
     .finale-wrap .headline { font-size: 80px; }
 
+    #loader {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      transition: opacity 700ms ease, visibility 700ms;
+    }
+    #loader.is-done {
+      opacity: 0;
+      visibility: hidden;
+    }
+    .loader-inner { text-align: center; }
+    .loader-tower {
+      width: 4px;
+      height: 180px;
+      margin: 0 auto 26px;
+      background: linear-gradient(180deg, rgba(224,169,62,0), var(--gold));
+      animation: loaderRise 1.4s ease-in-out infinite;
+    }
+    @keyframes loaderRise {
+      0% { transform: scaleY(0.2); transform-origin: bottom; opacity: 0.3; }
+      50% { transform: scaleY(1); transform-origin: bottom; opacity: 1; }
+      100% { transform: scaleY(0.2); transform-origin: top; opacity: 0.3; }
+    }
+    .loader-text {
+      font-family: var(--mono);
+      font-size: 14px;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+    }
+
     #hud {
       position: fixed;
       left: 50%;
@@ -637,6 +757,28 @@
       inset: 0;
       transform-origin: center center;
     }
+    .pane-thumb,
+    .pane-sub-thumb {
+      display: none;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    body.is-canvas-finale .pane-img,
+    body.is-canvas-finale .pane-sub-img {
+      display: none;
+    }
+    body.is-canvas-finale .pane-thumb,
+    body.is-canvas-finale .pane-sub-thumb {
+      display: block;
+    }
+    body.is-canvas-finale .hook-thumb {
+      display: block;
+    }
+    .hook-thumb {
+      display: none;
+    }
+
     .pane-img,
     .pane-sub-img {
       width: 100%;
@@ -682,40 +824,18 @@
       background: transparent !important;
     }
 
-    /* State 32 Full-Canvas Finale: animated golden energy pulses along callout pipes */
-    .callout-pulse {
-      fill: none;
-      stroke: var(--gold);
-      stroke-width: 9;
-      stroke-linecap: round;
-      stroke-dasharray: 220 480;
-      opacity: 0;
-      filter: drop-shadow(0 0 22px rgba(224, 169, 62, 0.95));
-      transition: opacity 600ms ease;
-    }
-    body.is-canvas-finale .callout-pulse {
-      opacity: 1;
-      animation: pipePulse 2.4s linear infinite;
-    }
-    body.is-canvas-finale .callout-base {
-      stroke: rgba(224, 169, 62, 0.55);
-      stroke-width: 5;
-    }
-    body.is-canvas-finale .anchor-node {
-      fill: var(--gold);
-      filter: drop-shadow(0 0 24px rgba(224, 169, 62, 1));
-    }
-    /* At canvas zoom the pane headlines shrink to a few pixels, so hide the
-       copy and let the overview read as a wall of photography. */
+    /* Canvas finale: the building fills the frame and the conduits light up. */
     body.is-canvas-finale .state-layer {
       opacity: 0 !important;
     }
-    body.is-canvas-finale .scene {
-      border-color: rgba(224, 169, 62, 0.5);
+    body.is-canvas-finale .conn-branch {
+      background: linear-gradient(90deg,
+        rgba(224, 169, 62, 0.18) 0%,
+        rgba(224, 169, 62, 0.62) 45%,
+        rgba(224, 169, 62, 0.18) 100%);
     }
-    @keyframes pipePulse {
-      from { stroke-dashoffset: 700; }
-      to { stroke-dashoffset: 0; }
+    body.is-canvas-finale .conn-node {
+      background: var(--gold);
     }
 
     /* Only the pane that is on camera is promoted to its own layer.
@@ -737,33 +857,45 @@
 </head>
 <body>
 
+  <div id="grid"></div>
+
   <div id="viewport">
     <div id="world">
-      <svg id="callout-svg" viewBox="0 0 9600 7600">
-        <g id="callout-lines"></g>
-        <path id="active-beam" class="callout-active" d="" />
-      </svg>
+      <div id="conn-layer"></div>
 
-      <div class="tower-monument" id="tower-centerpiece">
-        <img src="assets/tower_full.jpg" alt="Empire State Building" />
-        <div class="tower-monument-vignette"></div>
-        <div class="tower-poster-header">
-          <div>Architectural spine, <span>New York, 1930 to 1931</span></div>
-          <div>Human resource management in civil engineering</div>
-        </div>
-        <div class="tower-poster-footer">
-          <div>
-            <h2>The Empire State Building</h2>
-            <p>Built by about 3,400 coordinated workers in 410 days</p>
+      <div class="tower-3d" id="tower-3d">
+        <div class="tower-sky" data-depth="sky"></div>
+        <div class="tower-slab" data-depth="mid">
+          <div class="tower-monument" id="tower-centerpiece">
+            <img src="assets/tower_full.jpg" alt="Empire State Building" />
+            <div class="tower-monument-vignette"></div>
+            <div class="tower-poster-header">
+              <div>Architectural spine, <span>New York, 1930 to 1931</span></div>
+              <div>Human resource management in civil engineering</div>
+            </div>
+            <div class="tower-poster-footer">
+              <div class="tower-poster-stats">
+                <div><div class="num">102</div><div class="lbl">Floors</div></div>
+                <div><div class="num">410</div><div class="lbl">Days</div></div>
+              </div>
+              <div>
+                <h2>The Empire State Building</h2>
+                <p>Built by about 3,400 coordinated workers in 410 days</p>
+              </div>
+            </div>
           </div>
-          <div class="tower-poster-stats">
-            <div><div class="num">102</div><div class="lbl">Floors</div></div>
-            <div><div class="num">410</div><div class="lbl">Days</div></div>
-          </div>
         </div>
+        <div class="tower-haze" data-depth="fg"></div>
       </div>
 
       <div id="scenes-layer"></div>
+    </div>
+  </div>
+
+  <div id="loader">
+    <div class="loader-inner">
+      <div class="loader-tower"></div>
+      <div class="loader-text">Preparing the deck</div>
     </div>
   </div>
 
