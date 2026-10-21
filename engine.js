@@ -553,6 +553,10 @@
   }
 
   setHookState(0, false, 0);
+  // Keep the opening question out of the idle start frame. It is pre-zeroed
+  // when Start is pressed, then revealed by the existing landing cascade.
+  hookQ.style.opacity = "0";
+  hookQ.style.pointerEvents = "none";
 
   function activatePane(paneId, st, opts, id) {
     if (paneId === 1) {
