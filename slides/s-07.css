@@ -62,38 +62,10 @@
   margin-bottom: 4px;
 }
 
-/* Connected girder track: one steel beam with a fill that draws left to right */
-#scene-7 .s07-beam {
-  position: relative;
-  flex: 0 0 10px;
-  height: 10px;
-  margin: 18px 0 0;
-  background: #1a2130;
-  border: 1px solid rgba(244, 240, 232, 0.16);
-  overflow: hidden;
-}
-#scene-7 .s07-beam-fill {
-  position: absolute;
-  inset: 0;
-  transform-origin: left center;
-  background: linear-gradient(180deg, #3d4659 0%, #2b3346 60%, #202839 100%);
-  animation: s07draw 1.2s ease-out both;
-}
-#scene-7 .s07-beam::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 2px;
-  background: rgba(244, 240, 232, 0.22);
-}
-@keyframes s07draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-
 #scene-7 .s07-track {
   display: grid;
   gap: 12px;
-  padding-top: 22px;
+  padding-top: 12px;
   align-items: start;
   flex: 0 0 auto;
 }
@@ -117,29 +89,6 @@
   min-height: 0;
 }
 #scene-7 .s07-node.is-dim .s07-node-in { opacity: 0.4; }
-
-/* Connector stub from the beam to each card: part of one path */
-#scene-7 .s07-node::before {
-  content: "";
-  position: absolute;
-  top: -23px;
-  left: 50%;
-  width: 2px;
-  height: 22px;
-  transform: translateX(-50%);
-  background: rgba(244, 240, 232, 0.4);
-}
-#scene-7 .s07-node::after {
-  content: "";
-  position: absolute;
-  top: -28px;
-  left: 50%;
-  width: 9px;
-  height: 9px;
-  transform: translateX(-50%) rotate(45deg);
-  background: #2b3346;
-  border: 1px solid rgba(244, 240, 232, 0.55);
-}
 
 #scene-7 .s07-node .num {
   font-family: var(--mono);

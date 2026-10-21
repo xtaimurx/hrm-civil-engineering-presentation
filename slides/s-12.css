@@ -36,7 +36,7 @@
 #scene-12 .s12-chips span {
   font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.06em;
   color: var(--ivory); background: rgba(224, 169, 62, 0.14);
-  border: 1px solid rgba(224, 169, 62, 0.4); border-radius: 999px;
+  border: 1px solid rgba(224, 169, 62, 0.4);
   padding: 5px 12px; white-space: nowrap;
 }
 #scene-12 .s12-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
