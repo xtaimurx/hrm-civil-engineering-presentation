@@ -13,6 +13,7 @@ window.HOOK_HTML = function (s1, s2) {
         <div class="kicker anim-item">${s1.kicker}</div>
         <h1 class="headline anim-item">${s1.title}</h1>
         <p class="dek anim-item">${s1.subtitle}</p>
+        <div class="hook-presenters anim-item">Presented by <span>Sufyan</span> · <span>Hasnain</span> · <span>Taimur</span></div>
       </div>
       <div class="morph-reveal-layer" id="hook-r">
         <div class="kicker anim-item">${s2.kicker}</div>
