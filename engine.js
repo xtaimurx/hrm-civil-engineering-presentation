@@ -93,8 +93,8 @@
     ],
     7: [
       { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, pos: "30% 34%", scrim: 0.30 },
-      { clip: [40, 60, 752, 60], imgScale: 1.0, imgX: 0, imgY: -470, pos: "50% 0%", scrim: 0.16 },
-      { clip: [52, 150, 744, 150], imgScale: 1.06, imgX: 0, imgY: -478, pos: "50% 0%", scrim: 0.16 },
+      { clip: [40, 0, 640, 0], imgScale: 1.0, imgX: 0, imgY: -310, pos: "50% 0%", scrim: 0.16 },
+      { clip: [52, 0, 628, 0], imgScale: 1.06, imgX: 0, imgY: -318, pos: "50% 0%", scrim: 0.16 },
     ],
     8: [
       { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, pos: "65% 20%", scrim: 0.32 },

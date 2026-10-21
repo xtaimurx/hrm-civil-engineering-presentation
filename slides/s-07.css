@@ -47,9 +47,10 @@
   overflow: hidden;
 }
 #scene-7 .s07-banner-spacer {
-  flex: 0 0 108px;
-  height: 108px;
-  margin: 0 0 24px;
+  flex: 0 0 220px;
+  width: calc(100% + 120px);
+  height: 220px;
+  margin: 0 -60px 24px;
 }
 #scene-7 .s07-head .kicker { font-size: 15px; margin-bottom: 8px; }
 #scene-7 .s07-head .headline { font-size: 40px; line-height: 1.1; margin: 0 0 8px; }
