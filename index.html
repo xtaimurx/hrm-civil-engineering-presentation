@@ -96,23 +96,6 @@
                                 rgba(7, 9, 14, 0) 74%, rgba(7, 9, 14, 0.30) 100%);
     }
 
-    .tower-poster-header {
-      position: absolute;
-      left: 620px;
-      right: 620px;
-      top: 135px;
-      display: flex;
-      justify-content: space-between;
-      gap: 60px;
-      border-bottom: 2px solid rgba(224, 169, 62, 0.5);
-      padding-bottom: 52px;
-      font-family: var(--mono);
-      font-size: 44px;
-      letter-spacing: 0.08em;
-    }
-
-    .tower-poster-header span { color: var(--gold); }
-
     .tower-poster-footer {
       position: absolute;
       left: 620px;
@@ -787,6 +770,20 @@
       display: none;
     }
 
+    /* Use the already-decoded small covers during the intro's wide canvas
+       pass. This avoids repeatedly rasterizing every full-resolution pane
+       while the camera pulls back across the entire world. */
+    body.is-canvas-intro .pane-img,
+    body.is-canvas-intro .pane-sub-img,
+    body.is-canvas-intro #hook-photo > img:not(.hook-thumb) {
+      display: none;
+    }
+    body.is-canvas-intro .pane-thumb,
+    body.is-canvas-intro .pane-sub-thumb,
+    body.is-canvas-intro #hook-photo > .hook-thumb {
+      display: block;
+    }
+
     .pane-img,
     .pane-sub-img {
       width: 100%;
@@ -898,10 +895,6 @@
           <div class="tower-monument" id="tower-centerpiece">
             <img src="assets/tower_full.jpg" alt="Empire State Building" />
             <div class="tower-monument-vignette"></div>
-            <div class="tower-poster-header">
-              <div>Architectural spine, <span>New York, 1930 to 1931</span></div>
-              <div>Human resource management in civil engineering</div>
-            </div>
             <div class="tower-poster-footer">
               <div class="tower-poster-stats">
                 <div><div class="num">102</div><div class="lbl">Floors</div></div>

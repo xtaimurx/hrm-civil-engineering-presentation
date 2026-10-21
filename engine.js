@@ -778,14 +778,22 @@
 
   function introSequence(id, target, done) {
     const alive = () => id === seq;
+    const thumbs = Array.from(document.querySelectorAll(".pane-thumb, .pane-sub-thumb"));
+    const useOverviewThumbs = thumbs.every((img) => img.complete && img.naturalWidth > 0);
     flyTo(spireTarget(), 1.8, () => {
       if (!alive()) return;
       setTimeout(() => {
         if (!alive()) return;
+        if (useOverviewThumbs) document.body.classList.add("is-canvas-intro");
         flyTo(canvasTarget(), 1.3, () => {
           if (!alive()) return;
           setTimeout(() => {
-            if (alive()) flyToPane(target, canvasTarget(), 1.4, done);
+            if (alive()) {
+              flyToPane(target, canvasTarget(), 1.4, () => {
+                document.body.classList.remove("is-canvas-intro");
+                if (done) done();
+              });
+            }
           }, 900);
         });
       }, 1600);
@@ -795,6 +803,7 @@
   function goTo(fi, opts = {}) {
     const next = Math.max(-1, Math.min(FLAT.length - 1, fi));
     if (next === current && !opts.force) return;
+    document.body.classList.remove("is-canvas-intro");
     const prev = current;
     current = next;
     const id = ++seq;
