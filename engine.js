@@ -388,15 +388,84 @@
 
   let cam = { x: GEO.axisX, y: TOWER_BOTTOM + 650, s: 0.46 };
   let camAnim = null;
+  let flightTimer = null;
   let current = -1;
   let seq = 0;
   let introPlayed = false;
 
   function applyCam(c) {
     cam = c;
-    world.style.transform =
+    world.style.transform = cameraTransform(c);
+  }
+
+  function cameraTransform(c) {
+    return (
       `translate3d(${viewport.clientWidth / 2}px, ${viewport.clientHeight / 2}px, 0) ` +
-      `scale(${c.s}) translate3d(${-c.x}px, ${-c.y}px, 0)`;
+      `scale(${c.s}) translate3d(${-c.x}px, ${-c.y}px, 0)`
+    );
+  }
+
+  // Freeze an interrupted WAAPI flight at its presented transform. The camera
+  // transform is T(center) * S(scale) * T(-camera), so its matrix gives the
+  // exact camera position back without needing a per-frame JS animation loop.
+  function stopCameraFlight() {
+    if (flightTimer) {
+      clearTimeout(flightTimer);
+      flightTimer = null;
+    }
+    if (camAnim) {
+      const m = new DOMMatrixReadOnly(getComputedStyle(world).transform);
+      const s = Math.hypot(m.m11, m.m12, m.m13) || cam.s;
+      const frozen = {
+        x: (viewport.clientWidth / 2 - m.m41) / s,
+        y: (viewport.clientHeight / 2 - m.m42) / s,
+        s,
+      };
+      const animation = camAnim;
+      camAnim = null;
+      animation.cancel();
+      document.body.classList.remove("is-flying");
+      applyCam(frozen);
+    }
+  }
+
+  function animateCamera(keyframes, dur, onDone) {
+    stopCameraFlight();
+    document.body.classList.add("is-flying");
+    const last = keyframes[keyframes.length - 1].camera;
+    const animation = world.animate(
+      keyframes.map(({ camera, offset }) => ({
+        transform: cameraTransform(camera),
+        offset,
+      })),
+      { duration: dur * 1000, easing: "linear", fill: "forwards" }
+    );
+    camAnim = animation;
+    animation.onfinish = () => {
+      if (camAnim !== animation) return;
+      camAnim = null;
+      applyCam(last);
+      animation.cancel();
+      if (flightTimer) clearTimeout(flightTimer);
+      flightTimer = setTimeout(() => {
+        flightTimer = null;
+        document.body.classList.remove("is-flying");
+      }, 320);
+      if (onDone) onDone();
+    };
+  }
+
+  function cubicProgress(x1, y1, x2, y2, x) {
+    const curve = (a, b, t) =>
+      3 * (1 - t) ** 2 * t * a + 3 * (1 - t) * t ** 2 * b + t ** 3;
+    let lo = 0;
+    let hi = 1;
+    for (let i = 0; i < 16; i++) {
+      const t = (lo + hi) / 2;
+      if (curve(x1, x2, t) < x) lo = t;
+      else hi = t;
+    }
+    return curve(y1, y2, (lo + hi) / 2);
   }
 
   function preZeroItems(root) {
@@ -630,30 +699,27 @@
   // A plain two point move, used for the intro's beats (up to the spire, then
   // back to the full canvas) where the tower waypoint is not wanted.
   function flyTo(to, dur, onDone) {
-    if (camAnim) camAnim.stop();
-    camAnim = null;
+    stopCameraFlight();
     const from = { ...cam };
     const dist = Math.hypot(to.x - from.x, to.y - from.y);
     const dip = dist > 600 ? 0.14 : 0;
     const ls0 = Math.log(from.s);
     const ls1 = Math.log(to.s);
-    document.body.classList.add("is-flying");
-    camAnim = window.Motion.animate(0, 1, {
-      duration: dur,
-      ease: [0.65, 0, 0.35, 1],
-      onUpdate: (t) => {
-        applyCam({
+    const keyframes = [];
+    const steps = 120;
+    for (let i = 0; i <= steps; i++) {
+      const raw = i / steps;
+      const t = cubicProgress(0.65, 0, 0.35, 1, raw);
+      keyframes.push({
+        offset: raw,
+        camera: {
           x: lerp(from.x, to.x, t),
           y: lerp(from.y, to.y, t),
           s: Math.exp(ls0 + (ls1 - ls0) * t - dip * Math.sin(Math.PI * t)),
-        });
-      },
-      onComplete: () => {
-        camAnim = null;
-        setTimeout(() => document.body.classList.remove("is-flying"), 320);
-        if (onDone) onDone();
-      },
-    });
+        },
+      });
+    }
+    animateCamera(keyframes, dur, onDone);
   }
 
   // Three phase flight: climb out to the building, drift slowly past it, then
@@ -666,40 +732,44 @@
     t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
   function flyToPane(target, from, dur, onDone) {
-    if (camAnim) camAnim.stop();
-    camAnim = null;
+    stopCameraFlight();
     const start = { ...cam };
     const wp = towerWaypoint(from, target);
     // While crossing the building, drift upward along its face.
     const drift = { x: wp.x, y: wp.y - 320, s: wp.s * 1.06 };
-    document.body.classList.add("is-flying");
-    camAnim = window.Motion.animate(0, 1, {
-      duration: dur,
-      ease: "linear",
-      onUpdate: (raw) => {
-        let p;
-        if (raw < PHASE_OUT) {
-          const u = easeOut(raw / PHASE_OUT);
-          p = { x: lerp(start.x, wp.x, u), y: lerp(start.y, wp.y, u) };
-          const ls = lerp(Math.log(start.s), Math.log(wp.s), u);
-          p.s = Math.exp(ls);
-        } else if (raw < PHASE_HOLD) {
-          const u = easeInOut((raw - PHASE_OUT) / (PHASE_HOLD - PHASE_OUT));
-          p = { x: lerp(wp.x, drift.x, u), y: lerp(wp.y, drift.y, u) };
-          p.s = Math.exp(lerp(Math.log(wp.s), Math.log(drift.s), u));
-        } else {
-          const u = easeInOut((raw - PHASE_HOLD) / (1 - PHASE_HOLD));
-          p = { x: lerp(drift.x, target.x, u), y: lerp(drift.y, target.y, u) };
-          p.s = Math.exp(lerp(Math.log(drift.s), Math.log(target.s), u));
-        }
-        applyCam(p);
-      },
-      onComplete: () => {
-        camAnim = null;
-        setTimeout(() => document.body.classList.remove("is-flying"), 320);
-        if (onDone) onDone();
-      },
-    });
+    const cameraAt = (raw) => {
+      let p;
+      if (raw < PHASE_OUT) {
+        const u = easeOut(raw / PHASE_OUT);
+        p = { x: lerp(start.x, wp.x, u), y: lerp(start.y, wp.y, u) };
+        const ls = lerp(Math.log(start.s), Math.log(wp.s), u);
+        p.s = Math.exp(ls);
+      } else if (raw < PHASE_HOLD) {
+        const u = easeInOut((raw - PHASE_OUT) / (PHASE_HOLD - PHASE_OUT));
+        p = { x: lerp(wp.x, drift.x, u), y: lerp(wp.y, drift.y, u) };
+        p.s = Math.exp(lerp(Math.log(wp.s), Math.log(drift.s), u));
+      } else {
+        const u = easeInOut((raw - PHASE_HOLD) / (1 - PHASE_HOLD));
+        p = { x: lerp(drift.x, target.x, u), y: lerp(drift.y, target.y, u) };
+        p.s = Math.exp(lerp(Math.log(drift.s), Math.log(target.s), u));
+      }
+      return p;
+    };
+    // Precompute the existing camera curve, then let the browser interpolate
+    // transform keyframes on the compositor instead of writing the 8200x9000
+    // world from JavaScript on every frame.
+    const keyframes = [{ offset: 0, camera: cameraAt(0) }];
+    const phases = [0, PHASE_OUT, PHASE_HOLD, 1];
+    const stepsPerPhase = 40;
+    for (let phase = 0; phase < phases.length - 1; phase++) {
+      const a = phases[phase];
+      const b = phases[phase + 1];
+      for (let i = 1; i <= stepsPerPhase; i++) {
+        const raw = lerp(a, b, i / stepsPerPhase);
+        keyframes.push({ offset: raw, camera: cameraAt(raw) });
+      }
+    }
+    animateCamera(keyframes, dur, onDone);
   }
 
   function introSequence(id, target, done) {
@@ -822,8 +892,8 @@
       introPlayed = true;
       introSequence(id, target, landed);
     } else if (!canAnimate() || opts.instant) {
-      if (camAnim) camAnim.stop();
-      camAnim = null;
+      stopCameraFlight();
+      document.body.classList.remove("is-flying");
       applyCam(target);
       landed();
     } else {
@@ -858,6 +928,7 @@
     const flying = document.body.classList.contains("is-flying");
     if (flying) {
       px.blend += (0 - px.blend) * 0.16;
+      return;
     } else if (px.moved) {
       px.x += (px.tx - px.x) * 0.08;
       px.y += (px.ty - px.y) * 0.08;
