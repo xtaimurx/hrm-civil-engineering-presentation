@@ -51,5 +51,5 @@
 }
 #scene-8 .s08-dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(244,240,232,0.4); align-self: center; flex: none; }
 #scene-8 .s08-meta h3 { font-family: var(--serif); font-weight: 400; font-size: 21px; line-height: 1.2; }
-#scene-8 .s08-body p { font-size: 15px; line-height: 1.4; color: var(--muted); }
+#scene-8 .s08-body p { font-size: 16px; line-height: 1.42; color: var(--muted); }
 #scene-8 .pillars-bg { display: none; }

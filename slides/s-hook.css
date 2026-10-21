@@ -35,7 +35,7 @@
   width: 880px;
 }
 #scene-1 .morph-question-layer .headline {
-  font-size: 64px;
+  font-size: 72px;
   max-width: 16ch;
   text-wrap: balance;
   text-shadow: 0 2px 24px rgba(0, 0, 0, 0.8);
@@ -109,7 +109,7 @@
   text-wrap: balance;
 }
 #scene-1 .morph-reveal-layer .dek {
-  font-size: 17px;
+  font-size: 18.5px;
   line-height: 1.5;
   max-width: 52ch;
 }
@@ -128,7 +128,7 @@
   margin-bottom: 4px;
 }
 #scene-1 .morph-metric-card .lbl {
-  font-size: 13.5px;
+  font-size: 15px;
   line-height: 1.4;
   color: var(--muted);
 }

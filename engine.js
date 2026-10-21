@@ -76,7 +76,7 @@
   const MEDIA_STATES = {
     3: [
       { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, pos: "50% 18%", scrim: 0.22 },
-      { clip: [176, 84, 300, 84], imgScale: 1.04, imgX: -30, imgY: -40, scrim: 0.08 },
+      { clip: [224, 84, 236, 84], imgScale: 1.04, imgX: -30, imgY: -40, scrim: 0.08 },
     ],
     4: [
       { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, pos: "30% 42%", scrim: 0.30 },
@@ -97,8 +97,8 @@
       { clip: [52, 150, 744, 150], imgScale: 1.06, imgX: 0, imgY: -478, pos: "50% 0%", scrim: 0.16 },
     ],
     8: [
-      { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, pos: "50% 28%", scrim: 0.32 },
-      { clip: [0, 1170, 0, 0], imgScale: 1, imgX: 0, imgY: 0, pos: "50% 30%", scrim: 0.10 },
+      { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, pos: "65% 20%", scrim: 0.32 },
+      { clip: [0, 1170, 0, 0], imgScale: 1.08, imgX: -680, imgY: 0, pos: "50% 30%", scrim: 0.10 },
     ],
     9: [
       { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, pos: "50% 52%", scrim: 0.34 },
@@ -116,11 +116,12 @@
     12: [
       {
         clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, pos: "58% 42%", scrim: 0.30,
-        sub: { clip: [576, 1008, 0, 0], opacity: 0 },
+        sub: { clip: [0, 0, 0, 0], opacity: 0 },
       },
       {
-        clip: [0, 1008, 324, 0], imgScale: 1, imgX: 0, imgY: 0, pos: "50% 40%", scrim: 0.10,
-        sub: { clip: [576, 1008, 0, 0], opacity: 1 },
+        // Proof state: the bridge photo fills the whole left rail.
+        clip: [0, 1008, 0, 0], imgScale: 1, imgX: 0, imgY: 0, pos: "58% 42%", scrim: 0.10,
+        sub: { clip: [0, 0, 0, 0], opacity: 0 },
       },
     ],
     13: [
@@ -152,7 +153,7 @@
   function canvasTarget() {
     // The whole canvas: building plus every pane. Framed on the content
     // bounds (the panes that overlap the tower) rather than the world box.
-    return { x: GEO.axisX, y: 4450, s: fitScale(6900, 8900, 0.995) };
+    return { x: GEO.axisX, y: 4500, s: fitScale(6600, 8000, 1.0) };
   }
 
   function paneTarget(paneId) {
@@ -178,17 +179,18 @@
   }
 
   function buildConnectors() {
-    // Central spine running the full height of the building.
+    // Central spine running the full height of the building. Offset by half
+    // its own width so its centreline sits exactly on the tower axis.
     const spine = document.createElement("div");
     spine.className = "conn-spine";
-    spine.style.left = GEO.axisX + "px";
+    spine.style.left = GEO.axisX - 4 + "px";
     spine.style.top = GEO.finY + "px";
     spine.style.height = GEO.hookY - GEO.finY + "px";
     connLayer.appendChild(spine);
 
     const spineHi = document.createElement("div");
     spineHi.className = "conn-spine-hi";
-    spineHi.style.left = GEO.axisX + "px";
+    spineHi.style.left = GEO.axisX - 4 + "px";
     spineHi.style.top = GEO.finY + "px";
     connLayer.appendChild(spineHi);
     connEls.spine = spineHi;
@@ -550,7 +552,7 @@
 
   /* ---- Connector highlight: a short bright segment that travels the conduit ---- */
   let pulseTimer = null;
-  const CONCURRENT = 4;
+  const CONCURRENT = 2;
   function pulseConnectors() {
     if (!canAnimate()) return;
     const branches = Object.keys(connEls).filter((k) => k !== "spine");
@@ -594,7 +596,7 @@
       i += 1;
     };
     step();
-    pulseTimer = setInterval(step, 1500);
+    pulseTimer = setInterval(step, 2600);
   }
 
   function stopPulses() {
@@ -702,14 +704,14 @@
 
   function introSequence(id, target, done) {
     const alive = () => id === seq;
-    flyTo(spireTarget(), 2.8, () => {
+    flyTo(spireTarget(), 1.8, () => {
       if (!alive()) return;
       setTimeout(() => {
         if (!alive()) return;
-        flyTo(canvasTarget(), 1.9, () => {
+        flyTo(canvasTarget(), 1.3, () => {
           if (!alive()) return;
           setTimeout(() => {
-            if (alive()) flyToPane(target, canvasTarget(), 2.0, done);
+            if (alive()) flyToPane(target, canvasTarget(), 1.4, done);
           }, 900);
         });
       }, 1600);
@@ -748,7 +750,7 @@
       if (!canAnimate() || opts.instant) {
         applyCam(canvasTarget());
       } else {
-        flyToPane(canvasTarget(), paneTarget(tgt.pane), 2.4);
+        flyToPane(canvasTarget(), paneTarget(tgt.pane), 1.6);
         playWhoosh();
       }
       return;
@@ -825,28 +827,23 @@
       applyCam(target);
       landed();
     } else {
-      flyToPane(target, from, 2.3, landed);
+      flyToPane(target, from, 1.5, landed);
     }
     if (!opts.instant && tgt) playWhoosh();
   }
 
-  /* ---- Parallax: the tower has depth, and so does the active pane ---- */
+  /* ---- Parallax: the tower has depth; the active pane tilts as one rigid card.
+     Per-element depth offsets inside panes were removed: text, cards, images
+     and rules must move together so copy can never slide out from under its
+     image or beam line. ---- */
   const px = { x: 0, y: 0, tx: 0, ty: 0, blend: 0, moved: false };
-  const depthCur = new WeakMap();
-  let depthEls = [];
   let activePane = null;
   let lastActive = null;
-
-  function cacheDepthEls() {
-    const el = activePane ? sceneEls[activePane] : null;
-    depthEls = el ? Array.from(el.querySelectorAll("[data-depth]")) : [];
-  }
 
   function setActivePane(id) {
     if (id === lastActive) return;
     lastActive = id;
     activePane = id;
-    cacheDepthEls();
   }
 
   window.addEventListener("mousemove", (e) => {
@@ -854,8 +851,6 @@
     px.ty = e.clientY / window.innerHeight - 0.5;
     px.moved = true;
   });
-
-  const DEPTH = { sky: 34, bg: 46, mid: 78, fg: 120 };
 
   function parallaxTick() {
     requestAnimationFrame(parallaxTick);
@@ -870,30 +865,22 @@
     }
     if (px.blend < 0.005) return;
 
-    // Tower depth layers (always present, on the canvas).
+    // Tower depth layers (always present, on the canvas). Frozen during the
+    // canvas finale so the tilted tower can never drift off the spine.
     const tower = document.getElementById("tower-3d");
     if (tower) {
-      const ry = (px.x * 5.2 * px.blend).toFixed(3);
-      const rx = (-px.y * 2.6 * px.blend).toFixed(3);
-      tower.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
-    }
-
-    for (let i = 0; i < depthEls.length; i++) {
-      const el = depthEls[i];
-      if (el.dataset.anim) continue;
-      const f = DEPTH[el.dataset.depth] || 40;
-      const tx = Math.max(-70, Math.min(70, -px.x * f * px.blend));
-      const ty = Math.max(-50, Math.min(50, -px.y * f * px.blend));
-      let cur = depthCur.get(el);
-      if (!cur) {
-        cur = { x: 0, y: 0 };
-        depthCur.set(el, cur);
+      if (document.body.classList.contains("is-canvas-finale")) {
+        tower.style.transform = "none";
+      } else {
+        const ry = (px.x * 5.2 * px.blend).toFixed(3);
+        const rx = (-px.y * 2.6 * px.blend).toFixed(3);
+        tower.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
       }
-      cur.x += (tx - cur.x) * 0.16;
-      cur.y += (ty - cur.y) * 0.16;
-      el.style.transform = `translate3d(${cur.x.toFixed(2)}px, ${cur.y.toFixed(2)}px, 0)`;
     }
 
+    // NOTE: no per-element parallax inside the active pane. Text, cards,
+    // images and rules all move together as one rigid card (whole-pane tilt
+    // below), so copy can never slide out from under its image or beam.
     const el = activePane ? sceneEls[activePane] : null;
     if (el) {
       const rx = (-px.y * 3.4 * px.blend).toFixed(3);

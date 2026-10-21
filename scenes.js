@@ -135,7 +135,7 @@ window.SCENES = [
     title: "How HR responsibilities shift across seven stages",
     stages: [
       { num: "01", name: "Planning", desc: "Estimate staffing needs, specialist skills, and workforce budgets." },
-      { num: "02", name: "Design", desc: "Assign structural engineers, surveyors, and estimators." },
+      { num: "02", name: "Design", desc: "Assign architects, structural engineers, surveyors, and estimators." },
       { num: "03", name: "Procurement", desc: "Select contractors, vet subcontractors, and run site induction." },
       { num: "04", name: "Construction", desc: "Allocate labour, supervise crews, and deliver safety training." },
       { num: "05", name: "Quality control", desc: "Assign inspection personnel, testing, and documentation." },

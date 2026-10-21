@@ -20,14 +20,14 @@ window.SCENE_RENDER[12] = function (s, st) {
         <figure class="s12-main anim-item" data-depth="bg">
           <img src="${main}" alt="Men repairing a suspension bridge over a river in Gilgit Baltistan" />
         </figure>
-        <figure class="s12-sub anim-item" data-depth="bg">
-          <img src="${sub}" alt="Cranes silhouetted at sunset over a construction site" />
-        </figure>
       </div>
       <div class="s12-copy">
         <div class="kicker anim-item" data-depth="mid">${s.kicker}</div>
         <h2 class="headline anim-item" data-depth="mid">${s.title}</h2>
         <p class="dek anim-item" data-depth="mid">${s.subtitle}</p>
+        <div class="s12-chips anim-item" data-depth="mid">
+          <span>Housing</span><span>Roads</span><span>Bridges</span><span>Dams</span><span>Irrigation</span><span>Energy</span>
+        </div>
         <div class="s12-grid">
           ${s.cards.map((c) => `
           <div class="s12-card anim-item" data-depth="fg">

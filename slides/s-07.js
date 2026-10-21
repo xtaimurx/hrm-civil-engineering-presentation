@@ -18,11 +18,9 @@ window.SCENE_RENDER[7] = function (s, st) {
   }
 
   function banner() {
-    return (
-      '<figure class="s07-banner" data-depth="bg">' +
-        '<img src="' + IMG + '" alt="' + ALT + '" />' +
-      "</figure>"
-    );
+    // Borderless spacer: the persistent pane-media strip behind it carries
+    // the real photograph (state-layer imgs are stripped by the engine).
+    return '<div class="s07-banner-spacer" aria-hidden="true"></div>';
   }
 
   function beam() {

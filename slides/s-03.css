@@ -10,7 +10,9 @@
     rgba(7, 9, 14, 0.15) 60%,
     rgba(7, 9, 14, 0.88) 100%);
 }
-#scene-3 .s3-shade-stakes { background: none; }
+#scene-3 .s3-shade-stakes {
+  background: linear-gradient(180deg, rgba(7, 9, 14, 0.62) 0%, rgba(7, 9, 14, 0.18) 30%, rgba(7, 9, 14, 0) 55%);
+}
 #scene-3 .s3-cover-copy {
   position: absolute; z-index: 2; left: 84px; right: 84px; bottom: 64px;
   max-width: 1100px;
@@ -24,7 +26,7 @@
   font-family: var(--serif); font-size: 38px; line-height: 1.08;
   color: var(--ivory); margin-bottom: 8px;
 }
-#scene-3 .s3-stakes-top .dek { font-size: 18px; max-width: 78ch; }
+#scene-3 .s3-stakes-top .dek { font-size: 19px; max-width: 78ch; }
 #scene-3 .s3-pillars {
   position: absolute; z-index: 2; left: 84px; right: 84px; bottom: 42px;
   display: grid; grid-template-columns: repeat(3, 1fr);
@@ -42,4 +44,4 @@
   font-family: var(--serif); font-size: 22px; font-weight: 400;
   color: var(--ivory); margin-bottom: 6px;
 }
-#scene-3 .s3-pillar p { font-size: 15px; line-height: 1.4; color: var(--muted); }
+#scene-3 .s3-pillar p { font-size: 16px; line-height: 1.42; color: var(--muted); }

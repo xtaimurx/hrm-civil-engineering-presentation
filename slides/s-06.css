@@ -34,13 +34,13 @@
 }
 #scene-6 .s06-copy { padding: 48px 52px; justify-content: center; }
 #scene-6 .s06-copy .headline { font-size: 38px; line-height: 1.08; margin-bottom: 10px; }
-#scene-6 .s06-copy .dek { font-size: 17px; margin-bottom: 18px; max-width: 52ch; }
+#scene-6 .s06-copy .dek { font-size: 18px; margin-bottom: 18px; max-width: 52ch; }
 #scene-6 .s06-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
 #scene-6 .s06-card {
   background: rgba(255,255,255,0.03);
   border: 1px solid rgba(244,240,232,0.16);
   padding: 14px 16px;
 }
-#scene-6 .s06-card .tag { font-size: 12px; margin-bottom: 4px; }
-#scene-6 .s06-card h4 { font-size: 18px; margin-bottom: 5px; }
-#scene-6 .s06-card p { font-size: 14px; line-height: 1.4; }
+#scene-6 .s06-card .tag { font-size: 13px; margin-bottom: 4px; }
+#scene-6 .s06-card h4 { font-size: 19px; margin-bottom: 5px; }
+#scene-6 .s06-card p { font-size: 15px; line-height: 1.42; }
