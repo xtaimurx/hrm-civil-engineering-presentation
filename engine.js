@@ -76,7 +76,8 @@
   const MEDIA_STATES = {
     3: [
       { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, pos: "50% 18%", scrim: 0.22 },
-      { clip: [224, 84, 236, 84], imgScale: 1.04, imgX: -30, imgY: -40, scrim: 0.08 },
+      // Stakes state: panoramic band, FULL WIDTH, glides on height only.
+      { clip: [210, 0, 270, 0], imgScale: 1.04, imgX: -30, imgY: -40, scrim: 0.08 },
     ],
     4: [
       { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, pos: "30% 42%", scrim: 0.30 },
@@ -94,7 +95,7 @@
     7: [
       { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, pos: "30% 34%", scrim: 0.30 },
       { clip: [40, 0, 640, 0], imgScale: 1.0, imgX: 0, imgY: -310, pos: "50% 0%", scrim: 0.16 },
-      { clip: [52, 0, 628, 0], imgScale: 1.06, imgX: 0, imgY: -318, pos: "50% 0%", scrim: 0.16 },
+      { clip: [48, 0, 632, 0], imgScale: 1.06, imgX: 0, imgY: -318, pos: "50% 0%", scrim: 0.16 },
     ],
     8: [
       { clip: [0, 0, 0, 0], imgScale: 1.04, imgX: 0, imgY: 0, pos: "65% 20%", scrim: 0.32 },
@@ -526,8 +527,10 @@
     const incoming = toReveal ? hookR : hookQ;
     const outgoing = toReveal ? hookQ : hookR;
     const dur = animate && canAnimate() ? 0.88 : 0;
+    // Width-only morph: the photo keeps full height and docks as a left
+    // column. Height never animates here (jank + cropped look).
     const photoTo = toReveal
-      ? { left: "68px", top: "68px", width: "610px", height: "764px" }
+      ? { left: "0px", top: "0px", width: "660px", height: "900px" }
       : { left: "0px", top: "0px", width: "1600px", height: "900px" };
 
     hookQ.style.opacity = toReveal ? "0" : "1";
@@ -852,7 +855,7 @@
         Object.assign(
           hookPhoto.style,
           tgt.state === 1
-            ? { left: "68px", top: "68px", width: "610px", height: "764px" }
+            ? { left: "0px", top: "0px", width: "660px", height: "900px" }
             : { left: "0px", top: "0px", width: "1600px", height: "900px" }
         );
         hookShade.style.opacity = tgt.state === 1 ? "0.18" : "1";
