@@ -32,16 +32,17 @@
 #scene-13 .s13-count {
   font-family: var(--mono); font-size: 14px; letter-spacing: 0.08em; color: var(--gold);
 }
-#scene-13 .s13-rows { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 12px; }
+#scene-13 .s13-rows { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 12px; height: 400px; }
 #scene-13 .s13-row {
   display: flex; align-items: center; gap: 18px;
   border: 1px solid rgba(244,240,232,0.14);
   background: rgba(17,24,38,0.95);
-  padding: 15px 22px;
-  min-height: 0; overflow: hidden;
+  padding: 12px 22px;
+  flex: 1 1 0; min-height: 0; overflow: hidden;
 }
 #scene-13 .s13-num {
   font-family: var(--mono); font-size: 15px; letter-spacing: 0.06em;
-  color: var(--gold); flex: 0 0 40px;
+  font-variant-numeric: tabular-nums; text-align: right;
+  color: var(--gold); flex: 0 0 48px;
 }
-#scene-13 .s13-row p { font-size: 17px; line-height: 1.35; color: #f4f0e8; margin: 0; }
+#scene-13 .s13-row p { font-size: 17px; line-height: 1.35; color: #f4f0e8; margin: 0; text-wrap: pretty; }

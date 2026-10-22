@@ -25,7 +25,7 @@ window.SCENE_RENDER[11] = function (s, st) {
       <div class="s11-grid">
         ${s.pillars.map((p, i) => `
         <div class="s11-duty anim-item${i === 1 ? " is-mid" : ""}" data-depth="fg">
-          <div class="num">0${i + 1}</div>
+          <div class="s11-num">0${i + 1}</div>
           <h3>${p.head}</h3>
           <p>${p.body}</p>
         </div>`).join("")}

@@ -16,7 +16,7 @@
   left: 690px; right: 84px; bottom: 88px;
 }
 #scene-4 .s04-cover-copy .kicker { margin-bottom: 14px; }
-#scene-4 .s04-cover-copy .headline { font-size: 66px; line-height: 1.06; margin-bottom: 0; }
+#scene-4 .s04-cover-copy .headline { font-size: 66px; line-height: 1.06; margin-bottom: 0; text-wrap: balance; }
 
 /* State 1: photo left half, definition and cards right. */
 #scene-4 .s04-split { width: 100%; height: 100%; display: grid; grid-template-columns: 45% 55%; }
@@ -24,7 +24,7 @@
 #scene-4 .s04-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 30% 40%; display: block; }
 #scene-4 .s04-copy { padding: 56px 60px; display: flex; flex-direction: column; justify-content: center; }
 #scene-4 .s04-copy .kicker { margin-bottom: 10px; }
-#scene-4 .s04-copy .headline { font-size: 40px; line-height: 1.1; margin-bottom: 12px; }
+#scene-4 .s04-copy .headline { font-size: 40px; line-height: 1.1; margin-bottom: 12px; text-wrap: balance; }
 #scene-4 .s04-copy .dek { font-size: 18px; line-height: 1.5; margin-bottom: 20px; }
 #scene-4 .s04-cards { display: grid; grid-template-columns: 1fr; gap: 12px; }
 #scene-4 .s04-card {

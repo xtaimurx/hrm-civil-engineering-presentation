@@ -1,6 +1,15 @@
 /* Scene 15 finale: poster invite over tower_full.jpg plus small side note. */
 #scene-15 .state-layer { width: 100%; height: 100%; }
 #scene-15 .fin15 { position: relative; width: 100%; height: 100%; overflow: hidden; background: #07090e; }
+/* Local legibility veil over the persistent pane photo: softens the bright
+   sky behind the centered invite and the lower-right corner behind the note,
+   so both read without dimming the tower itself. Static gradients only. */
+#scene-15 .fin15::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(760px 300px at 50% 30%, rgba(7,9,14,0.38) 0%, rgba(7,9,14,0) 70%),
+    linear-gradient(180deg, rgba(7,9,14,0.30) 0%, rgba(7,9,14,0) 30%, rgba(7,9,14,0) 62%, rgba(7,9,14,0.42) 100%);
+}
 #scene-15 .fin15-photo { position: absolute; inset: 0; }
 #scene-15 .fin15-photo img {
   width: 100%; height: 100%;
@@ -32,7 +41,7 @@
 #scene-15 .is-note .fin15-headline { font-size: 76px; }
 #scene-15 .fin15-note {
   position: absolute; right: 68px; bottom: 64px;
-  width: 430px; max-width: 33.333%;
+  width: 400px; max-width: 33.333%;
   background: rgba(10,14,22,0.86);
   border: 1px solid rgba(244,240,232,0.18);
   padding: 24px 26px 22px;

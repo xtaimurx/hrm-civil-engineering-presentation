@@ -6,11 +6,11 @@ window.SCENE_RENDER = window.SCENE_RENDER || {};
 window.SCENE_RENDER[15] = function (s) {
   return `
     <div class="fin15 is-note">
-      <div class="fin15-center" data-depth="mid">
+      <div class="fin15-center">
         <div class="kicker anim-item">${s.kicker}</div>
         <h2 class="headline fin15-headline anim-item">${s.title}</h2>
       </div>
-      <aside class="fin15-note anim-item" data-depth="fg">
+      <aside class="fin15-note anim-item">
         <h3 class="anim-item">Empire State Building feats</h3>
         <ul>
           <li class="anim-item">102 floors above Manhattan</li>

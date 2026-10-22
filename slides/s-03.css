@@ -26,7 +26,7 @@
   font-family: var(--serif); font-size: 38px; line-height: 1.08;
   color: var(--ivory); margin-bottom: 8px;
 }
-#scene-3 .s3-stakes-top .dek { font-size: 19px; max-width: 78ch; }
+#scene-3 .s3-stakes-top .dek { font-size: 19px; max-width: 78ch; text-wrap: pretty; }
 #scene-3 .s3-pillars {
   position: absolute; z-index: 2; left: 84px; right: 84px; bottom: 42px;
   display: grid; grid-template-columns: repeat(3, 1fr);
@@ -37,11 +37,12 @@
   border: 1px solid rgba(244, 240, 232, 0.16);
   padding: 18px 22px;
 }
-#scene-3 .s3-pillar-num {
-  font-family: var(--mono); font-size: 13px; color: var(--gold); margin-bottom: 6px;
+#scene-3 .s3-num {
+  display: block;
+  font-family: var(--mono); font-size: 13px; letter-spacing: 0.08em; color: var(--gold); margin-bottom: 6px;
 }
 #scene-3 .s3-pillar h3 {
   font-family: var(--serif); font-size: 22px; font-weight: 400;
-  color: var(--ivory); margin-bottom: 6px;
+  color: var(--ivory); margin-bottom: 6px; text-wrap: balance;
 }
-#scene-3 .s3-pillar p { font-size: 16px; line-height: 1.42; color: var(--muted); }
+#scene-3 .s3-pillar p { font-size: 16px; line-height: 1.42; color: var(--muted); text-wrap: balance; }

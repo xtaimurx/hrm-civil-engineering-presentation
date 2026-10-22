@@ -31,6 +31,6 @@
 #scene-9 .s09-unit sup { font-size: 0.72em; }
 #scene-9 .s09-card h4 { font-family: var(--serif); font-size: 20px; font-weight: 400; margin-bottom: 6px; }
 #scene-9 .s09-card p { font-size: 14.5px; line-height: 1.42; color: var(--muted); }
-#scene-9 .s09-insight { grid-column: 1 / -1; background: #1a2334; padding: 20px 22px; }
+#scene-9 .s09-insight { grid-column: 1 / -1; background: #1a2334; padding: 20px 22px 20px 20px; border-left: 2px solid rgba(224, 169, 62, 0.85); }
 #scene-9 .s09-insight h4 { font-size: 24px; }
 #scene-9 .s09-insight p { font-size: 16px; }

@@ -23,7 +23,7 @@
   position: absolute; z-index: 2; left: 68px; top: 56px; width: 820px;
 }
 #scene-11 .s11-top .headline { font-size: 44px; line-height: 1.08; margin-bottom: 12px; }
-#scene-11 .s11-top .dek { font-size: 17.5px; line-height: 1.48; max-width: 58ch; }
+#scene-11 .s11-top .dek { font-size: 17.5px; line-height: 1.48; max-width: 70ch; }
 #scene-11 .s11-grid {
   position: absolute; z-index: 2; left: 68px; bottom: 56px; width: 820px;
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: stretch;

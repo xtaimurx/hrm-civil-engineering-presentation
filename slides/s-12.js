@@ -2,7 +2,6 @@
 window.SCENE_RENDER = window.SCENE_RENDER || {};
 window.SCENE_RENDER[12] = function (s, st) {
   const main = s.image || "assets/pakistan_bridge.jpg";
-  const sub = s.image2 || "assets/pakistan_site2.jpg";
   if (st === 0) {
     return `
     <div class="s12-cover">

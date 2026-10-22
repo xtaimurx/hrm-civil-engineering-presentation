@@ -51,6 +51,11 @@
   width: calc(100% + 120px);
   height: 220px;
   margin: 0 -60px 24px;
+  /* Frozen contract: borderless/transparent window — the persistent
+     pane-media strip behind it carries the photo (state-layer imgs are
+     stripped by the engine). Geometry must stay exactly 220px tall. */
+  background: transparent;
+  border: 0;
 }
 #scene-7 .s07-head .kicker { font-size: 15px; margin-bottom: 8px; }
 #scene-7 .s07-head .headline { font-size: 40px; line-height: 1.1; margin: 0 0 8px; }
@@ -66,7 +71,7 @@
   display: grid;
   gap: 12px;
   padding-top: 12px;
-  align-items: start;
+  align-items: stretch;
   flex: 0 0 auto;
 }
 #scene-7 .s07-track.cols-4 { grid-template-columns: repeat(4, 1fr); }
@@ -88,6 +93,9 @@
   flex: 1 1 auto;
   min-height: 0;
 }
+/* Dimmed (already-covered) stages recede as a whole card: the border lives
+   on the outer node so it needs its own fade, inner content via opacity. */
+#scene-7 .s07-node.is-dim { border-color: rgba(244, 240, 232, 0.07); }
 #scene-7 .s07-node.is-dim .s07-node-in { opacity: 0.4; }
 
 #scene-7 .s07-node .num {
